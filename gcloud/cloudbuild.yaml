@@ -1,0 +1,46 @@
+steps:
+
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args: [ '-c', 'gcloud secrets versions access latest --secret=libosdev-dockerhub-secret > pass.txt' ]
+    # this is a hack to get the BRANCH_NAME and SHORT_SHA in the build metadata even when
+    # submitted from via ./gcloud/push.sh.  All --substitutions variables have to exist in the
+    # yaml file.  Even when you are substiting special variables like BRANCH_NAME and SHORT_SHA (lame).
+    env: 
+      - 'REPO_NAME=$REPO_NAME'
+      - 'BRANCH_NAME=$BRANCH_NAME'
+      - 'SHORT_SHA=$SHORT_SHA'
+      - 'TAG_NAME=$TAG_NAME'
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "sh"
+    args: ["-c", "docker login --username=libosdev --password-stdin < pass.txt"]
+
+  - name: gcr.io/cloud-builders/git
+    entrypoint: "bash"
+    args: ["-c", "./cmds/clone.sh"]
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "bash"
+    args: ["-c", "./cmds/pull.sh"]
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "bash"
+    args: ["-c", "./cmds/build.sh"]
+    env: 
+      - 'CLOUD_BUILD=true'
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "bash"
+    args: ["-c", "./cmds/push.sh"]
+
+  - name: gcr.io/cloud-builders/gcloud
+    entrypoint: 'bash'
+    args: [ '-c', 'gcloud compute ssh $${CLUSTER_VM} --zone="$${CLUSTER_ZONE}" -- "BRANCH_NAME="$BRANCH_NAME" /opt/$$CLUSTER_NAME/gcloud/dc-deploy.sh"' ]
+    env: 
+      - 'BRANCH_NAME=$BRANCH_NAME'
+      - 'CLUSTER_NAME=rp-$BRANCH_NAME'
+      - 'CLUSTER_ZONE=us-central1-a'
+      - 'CLUSTER_VM=rp-ucd-deployments'
+
+timeout: 1800s
