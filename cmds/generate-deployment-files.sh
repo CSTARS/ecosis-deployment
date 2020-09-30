@@ -46,8 +46,8 @@ for key in $(compgen -v); do
   escaped=$(printf '%s\n' "${!key}" | sed -e 's/[\/&]/\\&/g')
   content=$(echo "$content" | sed "s/{{$key}}/${escaped}/g") 
 done
-if [ ! -d "../rp-local-dev" ]; then
-  mkdir ../rp-local-dev
+if [ ! -d "../ecosis-local-dev" ]; then
+  mkdir ../ecosis-local-dev
 fi
 
-echo "$content" > ../rp-local-dev/docker-compose.yaml
+echo "$content" > ../ecosis-local-dev/docker-compose.yaml

@@ -18,6 +18,7 @@ fi
 # Additionally set local-dev tags used by 
 # local development docker-compose file
 if [[ ! -z $LOCAL_BUILD ]]; then
+  echo "local build"
   SEARCH_TAG='local-dev'
   DATA_TAG='local-dev'
 fi

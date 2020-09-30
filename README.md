@@ -89,7 +89,7 @@ To get started with local development, do the following:
   - Build the `local-dev` tagged images:
     - `./cmds/build-local-dev.sh`
   - Start the local environment:
-    - `cd rp-local-dev; docker-compose up`
+    - `cd ecosis-local-dev; docker-compose up`
 
 
 Local development notes.

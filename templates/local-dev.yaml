@@ -5,19 +5,25 @@ services:
     image: {{POSTGRES_IMAGE_NAME}}:{{POSTGRES_TAG}}
     volumes:
       - pg-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   solr:
     image: {{SOLR_IMAGE_NAME}}:{{SOLR_TAG}}
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
+    ports:
+      - "8983:8983"
 
   mongo:
     image: {{MONGO_IMAGE_NAME}}:{{MONGO_TAG}}
     volumes:
       - mongo-data:/data/db
+    ports:
+      - "27017:27017"
 
   search:
-    image: {{SEARCH_IMAGE_NAME}}:{{SEARCH_TAG}}
+    image: {{SEARCH_IMAGE_NAME}}:local-dev
     volumes:
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/index.js:/app/index.js
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/lib:/app/lib
@@ -28,9 +34,10 @@ services:
     ports:
       - "${HOST_PORT:-3000}:3000"
 
+  # Run ckan on your host using favorite python IDE
+  # Mongo, Postgresql and Solr ports are exposed
 
 volumes:
   pg-data:
   solr-data:
   mongo-data:
-  ckan-data:

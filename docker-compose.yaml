@@ -2,35 +2,35 @@ version: '3'
 services:
 
   postgres:
-    image: {{POSTGRES_IMAGE_NAME}}:{{POSTGRES_TAG}}
+    image: postgres:9.3
     volumes:
       - pg-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
   solr:
-    image: {{SOLR_IMAGE_NAME}}:{{SOLR_TAG}}
+    image: ecosis/ecosis-solr:5.3
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
     ports:
       - "8983:8983"
 
   mongo:
-    image: {{MONGO_IMAGE_NAME}}:{{MONGO_TAG}}
+    image: mongo:3.4
     volumes:
       - mongo-data:/data/db
     ports:
       - "27017:27017"
 
   search:
-    image: {{SEARCH_IMAGE_NAME}}:{{SEARCH_TAG}}
+    image: ecosis/ecosis-search:deployment
     depends_on:
       - mongo
     ports:
       - "${SEARCH_HOST_PORT:-3000}:3000"
 
   ckan:
-    image: {{CKAN_IMAGE_NAME}}:{{CKAN_TAG}}
+    image: ecosis/ecosis-ckan:2.6.2
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:

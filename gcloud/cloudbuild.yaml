@@ -34,13 +34,4 @@ steps:
     entrypoint: "bash"
     args: ["-c", "./cmds/push.sh"]
 
-  - name: gcr.io/cloud-builders/gcloud
-    entrypoint: 'bash'
-    args: [ '-c', 'gcloud compute ssh $${CLUSTER_VM} --zone="$${CLUSTER_ZONE}" -- "BRANCH_NAME="$BRANCH_NAME" /opt/$$CLUSTER_NAME/gcloud/dc-deploy.sh"' ]
-    env: 
-      - 'BRANCH_NAME=$BRANCH_NAME'
-      - 'CLUSTER_NAME=rp-$BRANCH_NAME'
-      - 'CLUSTER_ZONE=us-central1-a'
-      - 'CLUSTER_VM=rp-ucd-deployments'
-
 timeout: 1800s
