@@ -24,6 +24,8 @@ services:
 
   search:
     image: {{SEARCH_IMAGE_NAME}}:local-dev
+    environment:
+      - MONGO_HOST=mongo
     volumes:
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/index.js:/app/index.js
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/lib:/app/lib
@@ -32,7 +34,8 @@ services:
     depends_on:
       - mongo
     ports:
-      - "${HOST_PORT:-3000}:3000"
+      - "${HOST_PORT:-8000}:8000"
+    # command: bash -c "tail -f /dev/null"
 
   # Run ckan on your host using favorite python IDE
   # Mongo, Postgresql and Solr ports are exposed

@@ -24,13 +24,15 @@ services:
 
   search:
     image: {{SEARCH_IMAGE_NAME}}:{{SEARCH_TAG}}
+    environment:
+      - MONGO_HOST=mongo
     depends_on:
       - mongo
     ports:
-      - "${SEARCH_HOST_PORT:-3000}:3000"
+      - "${SEARCH_HOST_PORT:-8000}:8000"
 
   ckan:
-    image: {{CKAN_IMAGE_NAME}}:{{CKAN_TAG}}
+    image: {{DATA_IMAGE_NAME}}:{{DATA_TAG}}
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:

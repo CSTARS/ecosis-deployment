@@ -46,6 +46,7 @@ RUN if [ -f /etc/ckan/who.ini ]; then \
 RUN ln -s /ckan/src/ckan/who.ini /etc/ckan/who.ini
 
 COPY ./run.sh /etc/ckan/run.sh
+COPY ./init.sh /etc/ckan/init.sh
 COPY ./template.ini /etc/ckan/template.ini
 COPY ./create_backup.sh /etc/ckan/create_backup.sh
 COPY ./restore_backup.sh /etc/ckan/restore_backup.sh

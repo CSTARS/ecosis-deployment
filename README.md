@@ -91,6 +91,12 @@ To get started with local development, do the following:
   - Start the local environment:
     - `cd ecosis-local-dev; docker-compose up`
 
+If this is the first time starting, you will need to initialize the postgresql database.  The `ecosis-data` container normally does this on start, however the `ecosis-data` container (CKAN) is not part of the local development cluster as CKAN should be run in your favorite IDE.
+
+To initialize the database:
+  - In a new terminal, run the init script, attaching to docker-compose cluster network.
+    - `docker run --rm -ti --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev /etc/ckan/init.sh`
+    - If your docker-compose cluster has a different name, you can run `docker network ls` to list out network names to substitute. 
 
 Local development notes.
 
