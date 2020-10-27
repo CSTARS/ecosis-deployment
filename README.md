@@ -98,7 +98,12 @@ To initialize the database:
     - `docker run --rm -ti --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev /etc/ckan/init.sh`
     - If your docker-compose cluster has a different name, you can run `docker network ls` to list out network names to substitute. 
 
-Local development notes.
+To Restore the database:
+  - In a new terminal, run the restore script in the same directory as the ecosis_backup.zip file, attaching to docker-compose cluster network.
+    - `docker run --rm -ti -v $(pwd):/io --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev /etc/ckan/restore_backup.sh`
+    - If your docker-compose cluster has a different name, you can run `docker network ls` to list out network names to substitute.
+
+### Local development notes.
 
    - Most containers have a commented out `command: bash -c "tail -f /dev/null"` in the `./ecosis-local-dev/docker-compose.yaml`.  You can uncomment this so the container starts without running the default process. Then you can bash onto container to for faster start/stop of server to see changes. ex:
      - uncomment `command: bash -c "tail -f /dev/null"` under the `search` service

@@ -1,17 +1,23 @@
 #! /bin/bash
 
+set -e
 
 root=""
 script_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$script_root/setup-simple-ini.sh
+$script_root/init-pg.sh
 CONF_FILE="$script_root/docker.ini"
 
-if [ -n "$1" ]
-then
-	root=$1
-	CONF_FILE="$script_root/default.ini"
-fi
+# if [ -n "$1" ]
+# then
+# 	root=$1
+# 	CONF_FILE="$script_root/default.ini"
+# fi
 
-ZIP_FILE=/io/ecosis_backup.zip
+if [[ -z "$ZIP_FILE" ]] ; then 
+	ZIP_FILE=/io/ecosis_backup.zip
+fi
 
 if [ ! -f "$ZIP_FILE" ]; then
 	echo "The zip file doesn't exist: $ZIP_FILE"
