@@ -52,7 +52,7 @@ if [ ! -f /etc/ckan/docker.ini ]; then
   fi
 
   # apply runtime arguments
-  paster config-tool /etc/ckan/docker.ini "beaker.session.secret=$SESSION_SECRET"
+  paster config-tool /etc/ckan/docker.ini "beaker.session.secret=$SESSION_SECRET" &>/dev/null
   paster config-tool /etc/ckan/docker.ini "app_instance_uuid={$INSTANCE_UUID}"
   paster config-tool /etc/ckan/docker.ini "ckan.site_url=$SITE_URL"
   paster config-tool /etc/ckan/docker.ini "ckan.site_id=$SITE_ID"
@@ -65,9 +65,9 @@ if [ ! -f /etc/ckan/docker.ini ]; then
   paster config-tool /etc/ckan/docker.ini "ecosis.doi.url=$DOI_URL"
   paster config-tool /etc/ckan/docker.ini "ecosis.doi.shoulder=$DOI_SHOULDER"
   paster config-tool /etc/ckan/docker.ini "ecosis.doi.username=$DOI_USERNAME"
-  paster config-tool /etc/ckan/docker.ini "ecosis.doi.password=$DOI_PASSWORD"
+  paster config-tool /etc/ckan/docker.ini "ecosis.doi.password=$DOI_PASSWORD" &>/dev/null
   paster config-tool /etc/ckan/docker.ini "ecosis.remote_hosts=$REMOTE_HOSTS"
-  paster config-tool /etc/ckan/docker.ini "ecosis.jwt.secret=$JWT_SECRET"
+  paster config-tool /etc/ckan/docker.ini "ecosis.jwt.secret=$JWT_SECRET" &>/dev/null
 
   cd $CWD
 fi

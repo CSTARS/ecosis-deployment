@@ -52,6 +52,7 @@ COPY ./setup-simple-ini.sh /etc/ckan/setup-simple-ini.sh
 COPY ./template.ini /etc/ckan/template.ini
 COPY ./create_backup.sh /etc/ckan/create_backup.sh
 COPY ./restore_backup.sh /etc/ckan/restore_backup.sh
+COPY ./wait-for-it.sh /etc/ckan/wait-for-it.sh
 
 RUN apt-get clean
 

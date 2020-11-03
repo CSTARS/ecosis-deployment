@@ -2,7 +2,7 @@ steps:
 
   - name: gcr.io/cloud-builders/gcloud
     entrypoint: 'bash'
-    args: [ '-c', 'gcloud secrets versions access latest --secret=libosdev-dockerhub-secret > pass.txt' ]
+    args: [ '-c', 'gcloud secrets versions access latest --secret=ecosisdev-dockerhub-password > pass.txt' ]
     # this is a hack to get the BRANCH_NAME and SHORT_SHA in the build metadata even when
     # submitted from via ./gcloud/push.sh.  All --substitutions variables have to exist in the
     # yaml file.  Even when you are substiting special variables like BRANCH_NAME and SHORT_SHA (lame).
@@ -14,7 +14,7 @@ steps:
 
   - name: gcr.io/cloud-builders/docker
     entrypoint: "sh"
-    args: ["-c", "docker login --username=libosdev --password-stdin < pass.txt"]
+    args: ["-c", "docker login --username=ecosisdev --password-stdin < pass.txt"]
 
   - name: gcr.io/cloud-builders/git
     entrypoint: "bash"

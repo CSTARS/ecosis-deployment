@@ -5,36 +5,37 @@ services:
     image: postgres:9.3
     volumes:
       - pg-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
 
   solr:
     image: ecosis/ecosis-solr:5.3
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
-    ports:
-      - "8983:8983"
 
   mongo:
     image: mongo:3.4
     volumes:
       - mongo-data:/data/db
-    ports:
-      - "27017:27017"
 
   search:
     image: ecosis/ecosis-search:deployment
+    environment:
+      - MONGO_HOST=mongo
+      - CLIENT_ENV=prod
     depends_on:
       - mongo
+    env_file:
+      - .env
     ports:
-      - "${SEARCH_HOST_PORT:-3000}:3000"
+      - "${SEARCH_HOST_PORT:-3000}:8000"
 
   ckan:
-    image: ecosis/ecosis-ckan:2.6.2
+    image: ecosis/ecosis-data:deployment
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
       - ckan-data:/var/lib/ckan
+    env_file:
+      - .env
     depends_on:
       - solr
       - mongo
