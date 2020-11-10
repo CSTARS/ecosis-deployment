@@ -3,7 +3,7 @@
 set -e
 
 # copy the template file
-if [ ! -f /etc/ckan/docker.ini ]; then
+# if [ ! -f /etc/ckan/docker.ini ]; then
   CWD=$(pwd)
 
   echo "Initializing ini file"
@@ -70,4 +70,4 @@ if [ ! -f /etc/ckan/docker.ini ]; then
   paster config-tool /etc/ckan/docker.ini "ecosis.jwt.secret=$JWT_SECRET" &>/dev/null
 
   cd $CWD
-fi
+# fi
