@@ -126,7 +126,7 @@ SESSION_SECRET=
 # CKAN should be random uuid for app instance. required.
 INSTANCE_UUID=
 # EcoSIS JWT secret. required.  should be long random string
-JWT_SECRET=justinisgreat
+JWT_SECRET=
 
 # main ckan url. for localhost use http://localhost:3001
 SITE_URL=
