@@ -11,18 +11,16 @@ RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
 
 RUN DEBIAN_FRONTEND=noninteractive
 RUN debconf-set-selections /preseed.txt
-RUN apt-get update
 
 # you can select Internet Site and localhost for postfix/smtp server
-RUN apt-get install -y python-dev python-setuptools build-essential zip \
+RUN apt-get update && apt-get install -y python-dev python-setuptools build-essential zip \
     libpq-dev git-core postfix postgresql-client unzip awscli --fix-missing
 RUN rm /preseed.txt
 
 # install matching (3.4) mongodb tool set
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.4 main" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-RUN apt-get update
-RUN apt-get install -y mongodb-org-tools mongodb-org-shell
+RUN apt-get update && install -y mongodb-org-tools mongodb-org-shell
 
 RUN easy_install pip
 
