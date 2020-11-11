@@ -34,6 +34,8 @@ services:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
       - ckan-data:/var/lib/ckan
+      - ckan-backup-data:/backup
+      - ./io:/io
     env_file:
       - .env
     depends_on:
@@ -46,3 +48,4 @@ volumes:
   solr-data:
   mongo-data:
   ckan-data:
+  ckan-backup-data:

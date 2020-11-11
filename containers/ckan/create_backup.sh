@@ -13,7 +13,7 @@ then
 fi
 
 
-dir="$script_root/back_tmp"
+dir="$script_root/backup"
 ZIP_FILE=ecosis_backup.zip
 
 # prep tmp dir

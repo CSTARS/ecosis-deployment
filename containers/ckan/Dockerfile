@@ -15,7 +15,7 @@ RUN apt-get update
 
 # you can select Internet Site and localhost for postfix/smtp server
 RUN apt-get install -y python-dev python-setuptools build-essential zip \
-    libpq-dev git-core postfix postgresql-client unzip --fix-missing
+    libpq-dev git-core postfix postgresql-client unzip awscli --fix-missing
 RUN rm /preseed.txt
 
 # install matching (3.4) mongodb tool set
@@ -51,6 +51,7 @@ COPY ./setup-ini.sh /etc/ckan/setup-ini.sh
 COPY ./setup-simple-ini.sh /etc/ckan/setup-simple-ini.sh
 COPY ./template.ini /etc/ckan/template.ini
 COPY ./create_backup.sh /etc/ckan/create_backup.sh
+COPY ./backup_cron.sh /etc/ckan/backup_cron.sh
 COPY ./restore_backup.sh /etc/ckan/restore_backup.sh
 COPY ./wait-for-it.sh /etc/ckan/wait-for-it.sh
 

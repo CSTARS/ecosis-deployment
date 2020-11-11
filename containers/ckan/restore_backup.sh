@@ -9,6 +9,7 @@ $script_root/setup-simple-ini.sh
 $script_root/init-pg.sh
 CONF_FILE="$script_root/docker.ini"
 
+# When we were trying to support backups outside of docker
 # if [ -n "$1" ]
 # then
 # 	root=$1
