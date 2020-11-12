@@ -13,18 +13,18 @@ then
 fi
 
 
-dir="$script_root/backup"
-ZIP_FILE=ecosis_backup.zip
+dir="/backup/tmp"
+ZIP_FILE=/backup/ecosis_backup.zip
 
 # prep tmp dir
 echo "Preparing tmp dir: $dir"
 if [ -d "$dir" ]; then
 	rm -rf $dir
 fi
-mkdir $dir
+mkdir -p $dir
 
-if [ -f "$script_root/$ZIP_FILE" ]; then
-	rm "$script_root/$ZIP_FILE"
+if [ -f "$ZIP_FILE" ]; then
+	rm "$ZIP_FILE"
 fi
 
 # init python virtual env for CKAN
@@ -58,10 +58,9 @@ ln -s "$root/var/lib/ckan" "$dir/var/lib/"
 
 echo "Compressing data"
 cd $dir
-zip -r ../$ZIP_FILE ./*
+zip -r $ZIP_FILE ./*
 
 echo "cleanup"
 cd .. && rm -rf $dir
 
-mv $ZIP_FILE /io
 echo "Zip Ready: $ZIP_FILE"

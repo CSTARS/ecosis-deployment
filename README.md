@@ -111,6 +111,23 @@ To Restore the database:
      - `ctrl+c` - stops the server
   - Code directories are mounted as volumes so changes to your host filesystem are reflected in container.  However, changes to application packages (ex: package.json) will require rebuild of images (`./cmds/build-local-dev.sh`)
 
+## Local Development - IDE
+
+The local development containers run PosgreSQL, Solr and MongoDB exposing the databases on their default ports.  You are then free to startup search on your host machine using NodeJS.  CKAN takes a little bit more effort.
+
+Running CKAN in PyCharm.
+
+  - clone the ckanext-ecosis repository: https://github.com/CSTARS/ckanext-ecosis
+  - create a local python environment following the ckan install instructions:
+    - https://docs.ckan.org/en/2.6/maintaining/installing/install-from-source.html#install-ckan-into-a-python-virtual-environment
+    - Note, you can skip the PG and Solr setup, the start containers will take care of that
+  - Start PyCharm and import ckanext-ecosis as a project
+  - In PyCharm run configurations set:
+    - script path: bin/paster
+    - parameters: --plugin=ckan serve etc/ckan/default.ini
+    - Working directory: path/to/ecosis-local
+
+
 # Usage
 
 ## Env File
@@ -178,7 +195,17 @@ output = json
 [default]
 aws_access_key_id = [key]
 aws_secret_access_key = [secret]
+aws_session_token = [secret]
 ```
+
+Reminders for multi factor authentication:
+
+```
+aws sts get-session-token --serial-number [iam mfa urn] --token-code [code from mfa device]
+```
+
+ - https://aws.amazon.com/premiumsupport/knowledge-center/authenticate-mfa-cli/
+ - https://docs.aws.amazon.com/cli/latest/reference/sts/get-session-token.html
 
 ## Backups
 

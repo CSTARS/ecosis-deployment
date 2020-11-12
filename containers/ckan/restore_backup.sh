@@ -31,7 +31,7 @@ if [ "$root" != "" ]; then
 	. "$script_root/../../bin/activate"
 fi
 
-dir="$script_root/back_tmp"
+dir="/io/tmp"
 
 if [ -d "$dir" ]; then
 	rm -rf $dir
