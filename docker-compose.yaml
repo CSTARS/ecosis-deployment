@@ -17,7 +17,7 @@ services:
       - mongo-data:/data/db
 
   search:
-    image: ecosis/ecosis-search:deployment
+    image: ecosis/ecosis-search:dev
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
@@ -29,7 +29,7 @@ services:
       - "${SEARCH_HOST_PORT:-3000}:8000"
 
   ckan:
-    image: ecosis/ecosis-data:deployment
+    image: ecosis/ecosis-data:dev
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
