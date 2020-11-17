@@ -150,6 +150,11 @@ SITE_URL=
 # main ecosis search url. for localhost use http://localhost:3000
 SEARCH_URL=
 
+# Host machine ports to bind EcoSIS search and CKAN servers
+# Defaults to 3000 and 3001
+# SEARCH_HOST_PORT=
+# DATA_HOST_PORT=
+
 # required if you are running backups.  Used to specify which AWS bucket to write to
 # Examples: prod, dev, local
 # BACKUP_ENV=
