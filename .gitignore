@@ -1,5 +1,7 @@
 .env
+.aws
 .DS_Store
+io
 ecosis-local-dev
 repositories
-io
+ecosis-backup.zip

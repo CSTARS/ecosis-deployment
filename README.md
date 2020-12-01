@@ -10,9 +10,8 @@ EcoSIS Web Applications Deployment
     - [Dev Cycle](#local-development---dev-cycle)
   - [Usage](#usage)
     - [Env File](#env-file)
-    - [Endpoints](#endpoints)
-      - [Public Endpoints](#public-endpoints)
-      - [Private Endpoints](#private-endpoints)
+    - [Local AWS](#local-aws)
+    - [Backups](#backups)
 
 # Application Setup
 
@@ -112,14 +111,124 @@ To Restore the database:
      - `ctrl+c` - stops the server
   - Code directories are mounted as volumes so changes to your host filesystem are reflected in container.  However, changes to application packages (ex: package.json) will require rebuild of images (`./cmds/build-local-dev.sh`)
 
+## Local Development - IDE
+
+The local development containers run PosgreSQL, Solr and MongoDB exposing the databases on their default ports.  You are then free to startup search on your host machine using NodeJS.  CKAN takes a little bit more effort.
+
+Running CKAN in PyCharm.
+
+  - clone the ckanext-ecosis repository: https://github.com/CSTARS/ckanext-ecosis
+  - create a local python environment following the ckan install instructions:
+    - https://docs.ckan.org/en/2.6/maintaining/installing/install-from-source.html#install-ckan-into-a-python-virtual-environment
+    - Note, you can skip the PG and Solr setup, the start containers will take care of that
+  - Start PyCharm and import ckanext-ecosis as a project
+  - In PyCharm run configurations set:
+    - script path: bin/paster
+    - parameters: --plugin=ckan serve etc/ckan/default.ini
+    - Working directory: path/to/ecosis-local
+
+
 # Usage
 
 ## Env File
 
 Here are the .env file parameters.
 
-  - `SERVER_URL` Public url for search system.  Defaults to http://localhost:3000
-  TODO
+```
+# CKAN ckan.site_id parameter. required.
+SITE_ID=ecosis
+
+# CKAN beaker.session.secret parameter. required. should be long random string
+SESSION_SECRET=
+# CKAN should be random uuid for app instance. required.
+INSTANCE_UUID=
+# EcoSIS JWT secret. required.  should be long random string
+JWT_SECRET=
+
+# main ckan url. for localhost use http://localhost:3001
+SITE_URL=
+# main ecosis search url. for localhost use http://localhost:3000
+SEARCH_URL=
+
+# Host machine ports to bind EcoSIS search and CKAN servers
+# Defaults to 3000 and 3001
+# SEARCH_HOST_PORT=
+# DATA_HOST_PORT=
+
+# required if you are running backups.  Used to specify which AWS bucket to write to
+# Examples: prod, dev, local
+# BACKUP_ENV=
+
+# required information for wiring up DOI minting
+# system will start without this, but will complain
+DOI_URL=
+DOI_SHOULDER=
+DOI_USERNAME=
+DOI_PASSWORD=
+
+# Hosts to notify on org change events. Optional. Should be Cloud Function endpoint for EcoSIS
+REMOTE_HOSTS=
+
+# The following should not be set unless you are changing the container environment
+# Postgres connection string, defaults to: postgresql://ckan_default:ckan_default@postgres/ckan_default
+# PG_CONN_STR=
+#
+# Mongo connection string, defaults to: mongodb://mongo:27017/
+# MONGO_CONN_STR=
+# 
+# Solr url, defaults to: http://solr:8983/solr/ckan
+# SOLR_URL=
+```
 
 
 There are additional config variables you an use see in the main [config.js](https://github.com/cstars/ecosis/blob/master/lib/config.js) file.  However it is not recommend to change them unless you know what you are doing.
+
+## Local AWS
+
+To test out aws locally you need to do the following. Create .aws folder with `config` and `credentials` and mount/copy to `/root` in `ckan` container.  Note, this is not required inside the AWS cloud assuming you have created an S3 role in IAM and associated role with EC2 instance
+https://aws.amazon.com/premiumsupport/knowledge-center/ec2-instance-access-s3-bucket/
+
+.aws/config 
+```
+[default]
+region = us-east-2
+output = json
+```
+
+.aws/credentials
+```
+[default]
+aws_access_key_id = [key]
+aws_secret_access_key = [secret]
+aws_session_token = [secret]
+```
+
+Reminders for multi factor authentication:
+
+```
+aws sts get-session-token --serial-number [iam mfa urn] --token-code [code from mfa device]
+```
+
+ - https://aws.amazon.com/premiumsupport/knowledge-center/authenticate-mfa-cli/
+ - https://docs.aws.amazon.com/cli/latest/reference/sts/get-session-token.html
+
+## Backups
+
+### Setup backup cron
+
+The backup cron `backup_cron.sh` will clean up the `/backups` dir, generate a new zip using `create_backup.sh` can copy zip file to AWS S3 bucket.  The bucket is based on the `BACKUP_ENV` variable name.
+
+To create a cron simple run `crontab -e` and add (runs once a day at 3am):
+```
+0 3 * * * /usr/local/bin/docker-compose -f /opt/ecosis-deployment-[dev|prod\/docker-compose.yml exec -T ckan /etc/ckan/backup_cron.sh
+```
+
+### Restore from backup
+
+WARNING.  This will wipe your instance and replace with data from zip file.
+
+Copy backup from S3 bucket and place in ./io folder (The ./io folder is mounted into the CKAN container).  Rename to backup zipfile to `ecosis_backup.zip` removing the date from the filename.  Then from the root folder run:
+
+```
+docker-compose exec ckan /etc/ckan/restore_backup.sh
+```

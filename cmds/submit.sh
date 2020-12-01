@@ -10,6 +10,8 @@ set -e
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR/..
 
+gcloud config set project ecosis-prod
+
 echo "Submitting build to Google Cloud..."
 gcloud builds submit \
   --config ./gcloud/cloudbuild.yaml \

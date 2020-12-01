@@ -11,18 +11,16 @@ RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
 
 RUN DEBIAN_FRONTEND=noninteractive
 RUN debconf-set-selections /preseed.txt
-RUN apt-get update
 
 # you can select Internet Site and localhost for postfix/smtp server
-RUN apt-get install -y python-dev python-setuptools build-essential zip \
-    libpq-dev git-core postfix postgresql-client unzip --fix-missing
+RUN apt-get update && apt-get install -y python-dev python-setuptools build-essential zip \
+    libpq-dev git-core postfix postgresql-client unzip awscli --fix-missing
 RUN rm /preseed.txt
 
 # install matching (3.4) mongodb tool set
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.4 main" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
-RUN apt-get update
-RUN apt-get install -y mongodb-org-tools mongodb-org-shell
+RUN apt-get update && apt-get install -y mongodb-org-tools mongodb-org-shell
 
 RUN easy_install pip
 
@@ -51,7 +49,9 @@ COPY ./setup-ini.sh /etc/ckan/setup-ini.sh
 COPY ./setup-simple-ini.sh /etc/ckan/setup-simple-ini.sh
 COPY ./template.ini /etc/ckan/template.ini
 COPY ./create_backup.sh /etc/ckan/create_backup.sh
+COPY ./backup_cron.sh /etc/ckan/backup_cron.sh
 COPY ./restore_backup.sh /etc/ckan/restore_backup.sh
+COPY ./wait-for-it.sh /etc/ckan/wait-for-it.sh
 
 RUN apt-get clean
 
