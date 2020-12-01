@@ -23,14 +23,16 @@ services:
       - "27017:27017"
 
   search:
-    image: ecosis/ecosis-search:deployment
+    image: ecosis/ecosis-search:v2.0.0
+    environment:
+      - MONGO_HOST=mongo
     depends_on:
       - mongo
     ports:
-      - "${SEARCH_HOST_PORT:-3000}:3000"
+      - "${SEARCH_HOST_PORT:-8000}:8000"
 
   ckan:
-    image: ecosis/ecosis-ckan:2.6.2
+    image: ecosis/ecosis-data:v2.0.0
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
