@@ -56,6 +56,7 @@ set -e
   paster config-tool /etc/ckan/docker.ini "app_instance_uuid={$INSTANCE_UUID}"
   paster config-tool /etc/ckan/docker.ini "ckan.site_url=$SITE_URL"
   paster config-tool /etc/ckan/docker.ini "ckan.site_id=$SITE_ID"
+  paster config-tool /etc/ckan/docker.ini "ckan.google_analytics_code=$DATA_GOOGLE_ANALYTICS_KEY"
 
   paster config-tool /etc/ckan/docker.ini "ecosis.mongo.url=$MONGO_CONN_STR"
   paster config-tool /etc/ckan/docker.ini "sqlalchemy.url=$PG_CONN_STR"
