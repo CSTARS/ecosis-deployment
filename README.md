@@ -94,7 +94,7 @@ If this is the first time starting, you will need to initialize the postgresql d
 
 To initialize the database:
   - In a new terminal, run the init script, attaching to docker-compose cluster network.
-    - `docker run --rm -ti --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev /etc/ckan/init.sh`
+    - `docker run --rm -ti --env-file=.env --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev bash -c "/etc/ckan/setup-ini.sh; /etc/ckan/init-pg.sh"`
     - If your docker-compose cluster has a different name, you can run `docker network ls` to list out network names to substitute. 
 
 To Restore the database:
