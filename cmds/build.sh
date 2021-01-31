@@ -27,7 +27,7 @@ SEARCH_REPO_HASH=$(git -C $REPOSITORY_DIR/$SEARCH_REPO_NAME log -1 --pretty=%h)
 DATA_REPO_HASH=$(git -C $REPOSITORY_DIR/$DATA_REPO_NAME log -1 --pretty=%h)
 
 # solr
-echo "building solr"
+echo "building solr $SOLR_IMAGE_NAME:$SOLR_TAG"
 docker build \
   -t $SOLR_IMAGE_NAME:$SOLR_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -35,7 +35,7 @@ docker build \
   ./containers/solr
 
 # ckan
-echo "building ckan"
+echo "building ckan $CKAN_IMAGE_NAME:$CKAN_TAG"
 docker build \
   -t $CKAN_IMAGE_NAME:$CKAN_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -44,7 +44,7 @@ docker build \
   ./containers/ckan
 
 # ecosis data
-echo "building ecosis data"
+echo "building ecosis data $DATA_IMAGE_NAME:$DATA_TAG"
 docker build \
   -t $DATA_IMAGE_NAME:$DATA_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -53,7 +53,7 @@ docker build \
   $REPOSITORY_DIR/$DATA_REPO_NAME
 
 # ecosis search
-echo "building ecosis search"
+echo "building ecosis search $SEARCH_IMAGE_NAME:$SEARCH_TAG"
 docker build \
   -t $SEARCH_IMAGE_NAME:$SEARCH_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \

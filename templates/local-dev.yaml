@@ -22,6 +22,11 @@ services:
     ports:
       - "27017:27017"
 
+  redis:
+    image: {{REDIS_IMAGE_NAME}}:{{REDIS_TAG}}
+    volumes:
+      - redis-data:/data
+
   search:
     image: {{SEARCH_IMAGE_NAME}}:local-dev
     environment:
@@ -37,6 +42,22 @@ services:
       - "${HOST_PORT:-8000}:8000"
     # command: bash -c "tail -f /dev/null"
 
+  ckan:
+    image: {{DATA_IMAGE_NAME}}:local-dev
+    ports:
+      - "${DATA_HOST_PORT:-5000}:5000"
+    volumes:
+      - ckan-data:/var/lib/ckan
+      - ../{{REPOSITORY_DIR}}/ckan:/src/ckan
+      - ../{{REPOSITORY_DIR}}/{{DATA_REPO_NAME}}:/src/ckanext-ecosis
+    env_file:
+      - .env
+    depends_on:
+      - solr
+      - mongo
+      - postgres
+    # command: bash -c "tail -f /dev/null"
+
   # Run ckan on your host using favorite python IDE
   # Mongo, Postgresql and Solr ports are exposed
 
@@ -44,3 +65,5 @@ volumes:
   pg-data:
   solr-data:
   mongo-data:
+  redis-data:
+  ckan-data:
