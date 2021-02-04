@@ -15,12 +15,15 @@ if [[ -z $CLOUD_BUILD ]]; then
   export DOCKER_BUILDKIT=1
 fi
 
+SOLR_VERSION=$SOLR_TAG
+
 # Additionally set local-dev tags used by 
 # local development docker-compose file
 if [[ ! -z $LOCAL_BUILD ]]; then
   echo "local build"
   SEARCH_TAG='local-dev'
   DATA_TAG='local-dev'
+  SOLR_TAG='local-dev'
 fi
 
 SEARCH_REPO_HASH=$(git -C $REPOSITORY_DIR/$SEARCH_REPO_NAME log -1 --pretty=%h)
@@ -31,6 +34,7 @@ echo "building solr $SOLR_IMAGE_NAME:$SOLR_TAG"
 docker build \
   -t $SOLR_IMAGE_NAME:$SOLR_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
+  --build-arg SOLR_VERSION=${SOLR_VERSION} \
   --cache-from=$SOLR_IMAGE_NAME:$DOCKER_CACHE_TAG \
   ./containers/solr
 

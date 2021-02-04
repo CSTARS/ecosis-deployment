@@ -2,12 +2,12 @@ version: '3'
 services:
 
   postgres:
-    image: postgres:9.3
+    image: postgres:13.1
     volumes:
       - pg-data:/var/lib/postgresql/data
 
   solr:
-    image: ecosis/ecosis-solr:5.3
+    image: ecosis/ecosis-solr:7.7.3
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
 

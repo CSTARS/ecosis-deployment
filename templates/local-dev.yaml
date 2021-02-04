@@ -7,9 +7,11 @@ services:
       - pg-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
 
   solr:
-    image: {{SOLR_IMAGE_NAME}}:{{SOLR_TAG}}
+    image: {{SOLR_IMAGE_NAME}}:local-dev
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
     ports:
