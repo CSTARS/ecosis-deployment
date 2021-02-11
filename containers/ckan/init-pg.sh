@@ -15,12 +15,12 @@ if [ "$EXISTS" != "1" ]; then
   psql -U postgres -h postgres -c "ALTER ROLE ckan_default WITH PASSWORD 'ckan_default';"
   createdb -U postgres -h postgres -O ckan_default ckan_default -E utf-8
   # paster db init -c /etc/ckan/docker.ini
-  ckan -c /etc/ckan/default/ckan.ini db init
+  ckan -c /etc/ckan/docker.ini db init
 
 
   # init the ecosis plugin tables
   # paster --plugin=ckanext-ecosis initdb -c /etc/ckan/docker.ini
-  ckan --plugin=ckanext-ecosis -c /etc/ckan/default/ckan.ini initdb
+  ckan --plugin=ckanext-ecosis -c /etc/ckan/docker.ini initdb
 
   # ensure docker directories 
   mkdir -p /var/lib/ckan/resources

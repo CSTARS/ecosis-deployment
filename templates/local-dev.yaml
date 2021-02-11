@@ -50,8 +50,8 @@ services:
       - "${DATA_HOST_PORT:-5000}:5000"
     volumes:
       - ckan-data:/var/lib/ckan
-      - ../{{REPOSITORY_DIR}}/ckan:/src/ckan
-      - ../{{REPOSITORY_DIR}}/{{DATA_REPO_NAME}}:/src/ckanext-ecosis
+      - ../{{REPOSITORY_DIR}}/ckan:/src/ckan/ckan
+      - ../{{REPOSITORY_DIR}}/{{DATA_REPO_NAME}}:/src/ckan/ecosis
     env_file:
       - .env
     depends_on:

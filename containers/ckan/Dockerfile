@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:18.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
@@ -13,8 +13,12 @@ RUN export DEBIAN_FRONTEND=noninteractive
 RUN debconf-set-selections /preseed.txt
 
 # you can select Internet Site and localhost for postfix/smtp server
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y python3-dev libpq-dev postgresql-client \
-    python3-pip python3-venv git-core postfix build-essential unzip awscli mongodb-clients --fix-missing
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    python3-dev libpq-dev postgresql-client \
+    python3-virtualenv python3-wheel \
+    python3-pip python3-venv git-core postfix \
+    build-essential unzip awscli mongodb-clients \
+    --fix-missing
 RUN rm /preseed.txt
 
 # install matching (3.4) mongodb tool set
@@ -30,11 +34,15 @@ RUN pip3 install --upgrade pip
 RUN mkdir -p /ckan
 
 RUN cd /ckan && \
-    pip3 install -e $GIT_URL
+    pip3 install --ignore-installed -e $GIT_URL
 
-# RUN pip install testrepository
-# RUN pip install --upgrade -r /ckan/src/ckan/requirements.txt
-# RUN pip install polib
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+# RUN pip3 install testrepository
+# RUN pip3 install --upgrade --no-cache-dir -r /ckan/src/ckan/requirement-setuptools.txt
+# RUN pip3 install --upgrade -r /ckan/src/ckan/requirements.txt
+# RUN pip3 install polib
 
 # RUN cd /ckan/src/ckan && \
 #     paster make-config ckan /etc/ckan/default.ini
@@ -43,10 +51,10 @@ RUN mkdir /etc/ckan
 RUN ckan generate config /etc/ckan/default.ini
 
 RUN if [ -f /etc/ckan/who.ini ]; then \
-        rm /etc/ckan/who.ini; \
-    fi
+    rm /etc/ckan/who.ini; \
+fi
 
-RUN ln -s /ckan/src/ckan/who.ini /etc/ckan/who.ini
+RUN ln -s /ckan/src/ckan/ckan/config/who.ini /etc/ckan/who.ini
 
 COPY ./run.sh /etc/ckan/run.sh
 COPY ./init-pg.sh /etc/ckan/init-pg.sh
@@ -58,7 +66,7 @@ COPY ./backup_cron.sh /etc/ckan/backup_cron.sh
 COPY ./restore_backup.sh /etc/ckan/restore_backup.sh
 COPY ./wait-for-it.sh /etc/ckan/wait-for-it.sh
 
-RUN apt-get clean
+# RUN apt-get clean
 
 EXPOSE 5000
 

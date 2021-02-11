@@ -56,7 +56,7 @@ set -e
 
   # apply runtime arguments
   ckan config-tool /etc/ckan/docker.ini "beaker.session.secret=$SESSION_SECRET" &>/dev/null
-  ckan config-tool /etc/ckan/docker.ini "app_instance_uuid={$INSTANCE_UUID}"
+  ckan config-tool /etc/ckan/docker.ini "app_instance_uuid=$INSTANCE_UUID"
   ckan config-tool /etc/ckan/docker.ini "ckan.site_url=$SITE_URL"
   ckan config-tool /etc/ckan/docker.ini "ckan.site_id=$SITE_ID"
   ckan config-tool /etc/ckan/docker.ini "ckan.google_analytics_code=$DATA_GOOGLE_ANALYTICS_KEY"
