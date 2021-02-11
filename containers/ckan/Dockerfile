@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive
 RUN debconf-set-selections /preseed.txt
 
 # you can select Internet Site and localhost for postfix/smtp server
-RUN apt-get update && apt-get install -y python-dev python-setuptools build-essential zip \
+RUN apt-get update && apt-get install -y python-dev python-setuptools python-pip build-essential zip \
     libpq-dev git-core postfix postgresql-client unzip awscli --fix-missing
 RUN rm /preseed.txt
 
@@ -22,7 +22,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14
 RUN echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.4 main" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
 RUN apt-get update && apt-get install -y mongodb-org-tools mongodb-org-shell
 
-RUN easy_install pip
+# RUN easy_install pip
 
 # create dir
 RUN mkdir -p /ckan
@@ -31,7 +31,7 @@ RUN cd /ckan && \
     pip install -e $GIT_URL
 
 RUN pip install testrepository
-RUN pip install --upgrade -r /ckan/src/ckan/requirements.txt
+RUN pip install -r /ckan/src/ckan/requirements.txt
 RUN pip install polib
 
 RUN cd /ckan/src/ckan && \
