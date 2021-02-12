@@ -17,7 +17,7 @@ services:
       - mongo-data:/data/db
 
   search:
-    image: ecosis/ecosis-search:v2.0.1
+    image: ecosis/ecosis-search:v2.0.2
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
