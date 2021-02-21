@@ -21,6 +21,7 @@ services:
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
+      - SERVER_URL=${SEARCH_URL}
     depends_on:
       - mongo
     env_file:
