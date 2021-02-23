@@ -23,4 +23,4 @@ service postfix start
 
 # cd /etc/ckan
 # paster serve /etc/ckan/docker.ini
-ckan -c /etc/ckan/docker.ini run
+ckan -c /etc/ckan/docker.ini run --host 0.0.0.0

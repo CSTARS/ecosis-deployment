@@ -30,7 +30,7 @@ set -e
     SOLR_URL="http://solr:8983/solr/ckan";
   fi
   if [[ -z "$REDIS_URL" ]] ; then 
-    REDIS_URL="redis://localhost:6379/0";
+    REDIS_URL="redis://redis:6379/0";
   fi
   if [[ -z "$SITE_URL" ]] ; then 
     echo "SITE_URL not set";

@@ -48,6 +48,7 @@ services:
     image: {{DATA_IMAGE_NAME}}:local-dev
     ports:
       - "${DATA_HOST_PORT:-5000}:5000"
+      - "5678:5678"
     volumes:
       - ckan-data:/var/lib/ckan
       - ../{{REPOSITORY_DIR}}/ckan:/src/ckan/ckan
@@ -58,7 +59,7 @@ services:
       - solr
       - mongo
       - postgres
-    # command: bash -c "tail -f /dev/null"
+    command: bash -c "tail -f /dev/null"
 
   # Run ckan on your host using favorite python IDE
   # Mongo, Postgresql and Solr ports are exposed

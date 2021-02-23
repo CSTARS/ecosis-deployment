@@ -16,4 +16,6 @@ RUN chown -R solr:solr /opt/solr/server/solr/ckan
 # don't have permission.
 RUN rm /solrconfig.zip
 
+COPY init-mount.sh /docker-entrypoint-initdb.d/init-mount.sh
+
 USER solr

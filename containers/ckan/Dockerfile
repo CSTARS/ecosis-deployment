@@ -27,8 +27,9 @@ RUN rm /preseed.txt
 # RUN apt-get update && apt-get install -y mongodb-org-tools mongodb-org-shell
 
 # RUN easy_install pip
-run pip3 install setuptools==44.1.0
+RUN pip3 install setuptools==44.1.0
 RUN pip3 install --upgrade pip
+RUN pip3 install debugpy
 
 # create dir
 RUN mkdir -p /ckan
@@ -65,6 +66,8 @@ COPY ./create_backup.sh /etc/ckan/create_backup.sh
 COPY ./backup_cron.sh /etc/ckan/backup_cron.sh
 COPY ./restore_backup.sh /etc/ckan/restore_backup.sh
 COPY ./wait-for-it.sh /etc/ckan/wait-for-it.sh
+COPY ./debug_server.py /etc/ckan/debug_server.py
+COPY ./debug.sh /etc/ckan/debug.sh
 
 # RUN apt-get clean
 

@@ -17,10 +17,9 @@ if [ "$EXISTS" != "1" ]; then
   # paster db init -c /etc/ckan/docker.ini
   ckan -c /etc/ckan/docker.ini db init
 
-
   # init the ecosis plugin tables
   # paster --plugin=ckanext-ecosis initdb -c /etc/ckan/docker.ini
-  ckan --plugin=ckanext-ecosis -c /etc/ckan/docker.ini initdb
+  ckan -c /etc/ckan/docker.ini ecosis initdb 
 
   # ensure docker directories 
   mkdir -p /var/lib/ckan/resources

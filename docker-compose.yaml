@@ -7,7 +7,7 @@ services:
       - pg-data:/var/lib/postgresql/data
 
   solr:
-    image: ecosis/ecosis-solr:7.7.3
+    image: ecosis/ecosis-solr:6.6.6
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
 
