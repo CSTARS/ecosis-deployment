@@ -16,7 +16,7 @@ APP_VERSION=v2.0.8
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
 SEARCH_TAG=v2.0.3
-DATA_TAG=v2.0.3
+DATA_TAG=v2.0.4
 
 CKAN_TAG=2.6.2
 POSTGRES_TAG=9.3
