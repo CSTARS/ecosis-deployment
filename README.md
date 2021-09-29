@@ -127,6 +127,10 @@ Running CKAN in PyCharm.
     - parameters: --plugin=ckan serve etc/ckan/default.ini
     - Working directory: path/to/ecosis-local
 
+## Local Development - Container Remote Debugging
+  - docker-compose exec ckan bash
+  - /etc/ckan/debug.sh
+  - Connect to Python remote debugger on port `5678`
 
 # Usage
 

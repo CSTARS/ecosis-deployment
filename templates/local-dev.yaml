@@ -51,8 +51,9 @@ services:
       - "5678:5678"
     volumes:
       - ckan-data:/var/lib/ckan
+      - ./io:/io
       - ../{{REPOSITORY_DIR}}/ckan:/src/ckan/ckan
-      - ../{{REPOSITORY_DIR}}/{{DATA_REPO_NAME}}:/src/ckan/ecosis
+      - ../{{REPOSITORY_DIR}}/{{DATA_REPO_NAME}}:/src/ckan/ckanext-ecosis
     env_file:
       - .env
     environment:

@@ -44,14 +44,16 @@ unzip "$ZIP_FILE" -d $dir
 
 # dump entire pg db
 echo "Cleaning CKAN DB"
-paster --plugin=ckan db clean -c $CONF_FILE
+ckan --config $CONF_FILE db clean 
 
 # load backup entire pg db
 echo "Loading CKAN backup"
-paster --plugin=ckan db load -c $CONF_FILE "$dir/pg_ckan_backup.sql"
+# ckan db load --config $CONF_FILE "$dir/pg_ckan_backup.sql"
+psql -U postgres -d ckan_default -h postgres -f $dir/pg_ckan_backup.sql
+ckan --config $CONF_FILE db upgrade
 
 # Rebuild Solr
-paster --plugin=ckan search-index rebuild -c $CONF_FILE
+ckan --config $CONF_FILE search-index rebuild 
 #paster db upgrade --config=/etc/ckan/docker.ini
 
 echo "Loading MongoDB backup"
