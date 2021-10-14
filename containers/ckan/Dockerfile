@@ -14,12 +14,18 @@ RUN debconf-set-selections /preseed.txt
 
 # you can select Internet Site and localhost for postfix/smtp server
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    python3-dev libpq-dev postgresql-client \
+    python3-dev libpq-dev wget lsb-release \
     python3-virtualenv python3-wheel \
     python3-pip python3-venv git-core postfix \
-    build-essential unzip awscli mongodb-clients \
+    build-essential unzip zip awscli mongodb-clients \
     --fix-missing
 RUN rm /preseed.txt
+
+# need the Postgresql 13 libraries
+RUN echo 1 && echo $(lsb_release -cs)
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | tee  /etc/apt/sources.list.d/pgdg.list
+RUN apt-get update && apt-get install -y postgresql-client-13
 
 # install matching (3.4) mongodb tool set
 # RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
