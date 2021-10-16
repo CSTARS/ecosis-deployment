@@ -18,6 +18,11 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  redis:
+    image: {{REDIS_IMAGE_NAME}}:{{REDIS_TAG}}
+    volumes:
+      - redis-data:/data
+
   search:
     image: {{SEARCH_IMAGE_NAME}}:{{SEARCH_TAG}}
     environment:
@@ -49,5 +54,6 @@ volumes:
   pg-data:
   solr-data:
   mongo-data:
+  redis-data:
   ckan-data:
   ckan-backup-data:
