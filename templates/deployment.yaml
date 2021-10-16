@@ -5,6 +5,8 @@ services:
     image: {{POSTGRES_IMAGE_NAME}}:{{POSTGRES_TAG}}
     volumes:
       - pg-data:/var/lib/postgresql/data
+    env_file:
+      - .env
 
   solr:
     image: {{SOLR_IMAGE_NAME}}:{{SOLR_TAG}}
