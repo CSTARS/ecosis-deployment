@@ -6,7 +6,7 @@
 
 # Main version number we are tagging the app with. Always update
 # this when you cut a new version of the app!
-APP_VERSION=v2.0.9
+APP_VERSION=v2.0.10
 
 ##
 # TAGS
@@ -15,7 +15,7 @@ APP_VERSION=v2.0.9
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-SEARCH_TAG=v2.0.3
+SEARCH_TAG=v2.0.4
 DATA_TAG=v2.0.4
 
 CKAN_TAG=2.6.2
