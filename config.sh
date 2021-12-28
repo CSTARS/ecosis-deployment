@@ -17,7 +17,7 @@ APP_VERSION=v2.0.10
 # Branches can be used for development deployments
 SEARCH_TAG=v2.0.4
 #DATA_TAG=v2.0.4
-DATA_TAG=main
+DATA_TAG=master
 
 CKAN_TAG=2.6.2
 POSTGRES_TAG=9.3
