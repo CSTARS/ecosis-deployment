@@ -30,6 +30,7 @@ RUN mkdir -p /ckan
 RUN cd /ckan && \
     pip install -e $GIT_URL
 
+RUN pip install pbr
 RUN pip install testrepository
 RUN pip install -r /ckan/src/ckan/requirements.txt
 RUN pip install polib
