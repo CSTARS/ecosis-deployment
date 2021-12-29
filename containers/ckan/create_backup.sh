@@ -37,7 +37,8 @@ fi
 
 # dump entire pg db
 echo "Backing up CKAN PostgreSQL data"
-paster --plugin=ckan db dump -c $CONF_FILE "$dir/pg_ckan_backup.sql"
+pg_dump -U postgres -d ckan_default -h postgres > $dir/pg_ckan_backup.sql
+# paster --plugin=ckan db dump -c $CONF_FILE "$dir/pg_ckan_backup.sql"
 
 # dump entire mongo db
 echo "Backing up MongoDB data"

@@ -15,27 +15,31 @@ if [[ -z $CLOUD_BUILD ]]; then
   export DOCKER_BUILDKIT=1
 fi
 
+SOLR_VERSION=$SOLR_TAG
+
 # Additionally set local-dev tags used by 
 # local development docker-compose file
 if [[ ! -z $LOCAL_BUILD ]]; then
   echo "local build"
   SEARCH_TAG='local-dev'
   DATA_TAG='local-dev'
+  SOLR_TAG='local-dev'
 fi
 
 SEARCH_REPO_HASH=$(git -C $REPOSITORY_DIR/$SEARCH_REPO_NAME log -1 --pretty=%h)
 DATA_REPO_HASH=$(git -C $REPOSITORY_DIR/$DATA_REPO_NAME log -1 --pretty=%h)
 
 # solr
-echo "building solr"
+echo "building solr $SOLR_IMAGE_NAME:$SOLR_TAG"
 docker build \
   -t $SOLR_IMAGE_NAME:$SOLR_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
+  --build-arg SOLR_VERSION=${SOLR_VERSION} \
   --cache-from=$SOLR_IMAGE_NAME:$DOCKER_CACHE_TAG \
   ./containers/solr
 
 # ckan
-echo "building ckan"
+echo "building ckan $CKAN_IMAGE_NAME:$CKAN_TAG"
 docker build \
   -t $CKAN_IMAGE_NAME:$CKAN_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -44,7 +48,7 @@ docker build \
   ./containers/ckan
 
 # ecosis data
-echo "building ecosis data"
+echo "building ecosis data $DATA_IMAGE_NAME:$DATA_TAG"
 docker build \
   -t $DATA_IMAGE_NAME:$DATA_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
@@ -53,7 +57,7 @@ docker build \
   $REPOSITORY_DIR/$DATA_REPO_NAME
 
 # ecosis search
-echo "building ecosis search"
+echo "building ecosis search $SEARCH_IMAGE_NAME:$SEARCH_TAG"
 docker build \
   -t $SEARCH_IMAGE_NAME:$SEARCH_TAG \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
