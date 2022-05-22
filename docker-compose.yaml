@@ -45,6 +45,8 @@ services:
       - ./io:/io
     env_file:
       - .env
+    environment:
+      - CKAN_HOME=/ckan/src
     depends_on:
       - solr
       - mongo
