@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
@@ -13,8 +13,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     --fix-missing
 
 # more help on this https://hub.docker.com/r/teraproc/postfix/~/dockerfile/
-RUN echo "postfix postfix/main_mailer_type string Internet site" > /preseed.txt
-RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
+# RUN echo "postfix postfix/main_mailer_type string Internet site" > /preseed.txt
+# RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
 
 RUN export DEBIAN_FRONTEND=noninteractive
 RUN debconf-set-selections /preseed.txt

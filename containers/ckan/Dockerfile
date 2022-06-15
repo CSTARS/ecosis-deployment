@@ -6,20 +6,19 @@ ENV GIT_URL "git+https://github.com/ckan/ckan.git@ckan-$CKAN_VERSION#egg=ckan[re
 
 
 # more help on this https://hub.docker.com/r/teraproc/postfix/~/dockerfile/
-RUN echo "postfix postfix/main_mailer_type string Internet site" > /preseed.txt
-RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
+# RUN echo "postfix postfix/main_mailer_type string Internet site" > /preseed.txt
+# RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
 
 RUN export DEBIAN_FRONTEND=noninteractive
-RUN debconf-set-selections /preseed.txt
+# RUN debconf-set-selections /preseed.txt
 
-# you can select Internet Site and localhost for postfix/smtp server
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-dev libpq-dev wget lsb-release \
     python3-virtualenv python3-wheel \
-    python3-pip python3-venv git-core postfix \
+    python3-pip python3-venv git-core vim \
     build-essential unzip zip awscli mongodb-clients \
     --fix-missing
-RUN rm /preseed.txt
+# RUN rm /preseed.txt
 
 # need the Postgresql 13 libraries
 RUN echo 1 && echo $(lsb_release -cs)

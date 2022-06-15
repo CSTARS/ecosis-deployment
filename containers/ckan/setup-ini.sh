@@ -53,6 +53,7 @@ set -e
   if [[ -z "$DOI_USERNAME" ]] ; then echo "DOI_USERNAME not set"; fi
   if [[ -z "$DOI_PASSWORD" ]] ; then echo "DOI_PASSWORD not set"; fi
   if [[ -z "$REMOTE_HOSTS" ]] ; then echo "REMOTE_HOSTS not set"; fi
+  if [[ -z "$SMTP_TLS" ]] ; then SMTP_TLS=False; fi
 
   # apply runtime arguments
   ckan config-tool /etc/ckan/docker.ini "beaker.session.secret=$SESSION_SECRET" &>/dev/null
@@ -75,6 +76,11 @@ set -e
   ckan config-tool /etc/ckan/docker.ini "ecosis.doi.password=$DOI_PASSWORD" &>/dev/null
   ckan config-tool /etc/ckan/docker.ini "ecosis.remote_hosts=$REMOTE_HOSTS"
   ckan config-tool /etc/ckan/docker.ini "ecosis.jwt.secret=$JWT_SECRET" &>/dev/null
+
+  ckan config-tool /etc/ckan/docker.ini "smtp.server=$SMTP_SERVER"
+  ckan config-tool /etc/ckan/docker.ini "smtp.user=$SMTP_USERNAME"
+  ckan config-tool /etc/ckan/docker.ini "smtp.password=$SMTP_PASSWORD" &>/dev/null
+  ckan config-tool /etc/ckan/docker.ini "smtp.starttls=$SMTP_TLS"
 
   cd $CWD
 # fi

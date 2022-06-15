@@ -5,9 +5,9 @@ ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $ROOT
 
 # start postfix
-postconf -e "myorigin = ecosis.org"
-postconf -e "myhostname = ecosis.org"
-service postfix start
+# postconf -e "myorigin = ecosis.org"
+# postconf -e "myhostname = ecosis.org"
+# service postfix start
 
 # let PG and Solr start up
 # TODO: add wait-for script
