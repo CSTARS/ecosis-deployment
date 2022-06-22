@@ -23,4 +23,4 @@ cd $ROOT
 
 # cd /etc/ckan
 # paster serve /etc/ckan/docker.ini
-ckan -c /etc/ckan/docker.ini run --host 0.0.0.0
+ckan run --disable-reloader --host 0.0.0.0

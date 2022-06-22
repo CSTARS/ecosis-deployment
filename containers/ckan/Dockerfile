@@ -75,6 +75,7 @@ COPY ./debug_server.py /etc/ckan/debug_server.py
 COPY ./debug.sh /etc/ckan/debug.sh
 
 # RUN apt-get clean
+ENV CKAN_INI=/etc/ckan/docker.ini
 
 EXPOSE 5000
 
