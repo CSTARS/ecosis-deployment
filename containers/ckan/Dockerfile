@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y postgresql-client-13
 # RUN easy_install pip
 RUN pip3 install setuptools==44.1.0
 RUN pip3 install --upgrade pip
-RUN pip3 install debugpy
+RUN pip3 install debugpy gunicorn
 
 # create dir
 RUN mkdir -p /ckan
@@ -62,6 +62,7 @@ fi
 
 RUN ln -s /ckan/src/ckan/ckan/config/who.ini /etc/ckan/who.ini
 
+COPY ./wsgi.py /etc/ckan/wsgi.py
 COPY ./run.sh /etc/ckan/run.sh
 COPY ./init-pg.sh /etc/ckan/init-pg.sh
 COPY ./setup-ini.sh /etc/ckan/setup-ini.sh
@@ -76,7 +77,5 @@ COPY ./debug.sh /etc/ckan/debug.sh
 
 # RUN apt-get clean
 ENV CKAN_INI=/etc/ckan/docker.ini
-
-EXPOSE 5000
 
 CMD bash -c '/etc/ckan/run.sh'
