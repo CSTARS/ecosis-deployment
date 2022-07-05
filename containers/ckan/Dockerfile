@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y postgresql-client-13
 # RUN easy_install pip
 RUN pip3 install setuptools==44.1.0
 RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade awscli
 RUN pip3 install debugpy gunicorn
 
 # create dir
