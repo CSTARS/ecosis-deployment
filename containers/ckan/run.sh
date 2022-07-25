@@ -25,4 +25,4 @@ cd $ROOT
 # paster serve /etc/ckan/docker.ini
 # ckan run --disable-reloader --host 0.0.0.0
 
-gunicorn -w 4 --bind 0.0.0.0:5000 wsgi:application
+gunicorn -w 4 --threads 2 --bind 0.0.0.0:5000 wsgi:application
