@@ -6,12 +6,12 @@ After placing file in ecosis-systemd (and making any required edits to path)
 
 ```
 cd /opt/ecosis-systemd
-sudo systemctl enable ecosis.service
+sudo systemctl enable /opt/ecosis-systemd/ecosis.service
 ```
 
 Then
 
 ```bash
-> sudo service [start|stop] ecosis
+> sudo service ecosis [start|stop] 
 ```
 
