@@ -2,12 +2,14 @@ version: '3'
 services:
 
   postgres:
-    image: postgres:9.3
+    image: postgres:13.1
     volumes:
       - pg-data:/var/lib/postgresql/data
+    env_file:
+      - .env
 
   solr:
-    image: ecosis/ecosis-solr:5.3
+    image: ecosis/ecosis-solr:6.6.6
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
 
@@ -15,6 +17,11 @@ services:
     image: mongo:3.4
     volumes:
       - mongo-data:/data/db
+
+  redis:
+    image: redis:6.0.5
+    volumes:
+      - redis-data:/data
 
   search:
     image: ecosis/ecosis-search:v2.0.4
@@ -29,7 +36,7 @@ services:
       - "${SEARCH_HOST_PORT:-3000}:8000"
 
   ckan:
-    image: ecosis/ecosis-data:v2.0.4
+    image: ecosis/ecosis-data:v3.0.0
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
@@ -38,6 +45,8 @@ services:
       - ./io:/io
     env_file:
       - .env
+    environment:
+      - CKAN_HOME=/ckan/src
     depends_on:
       - solr
       - mongo
@@ -47,5 +56,6 @@ volumes:
   pg-data:
   solr-data:
   mongo-data:
+  redis-data:
   ckan-data:
   ckan-backup-data:

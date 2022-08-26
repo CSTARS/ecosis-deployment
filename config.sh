@@ -6,7 +6,7 @@
 
 # Main version number we are tagging the app with. Always update
 # this when you cut a new version of the app!
-APP_VERSION=v2.0.10
+APP_VERSION=v3.0.0
 
 ##
 # TAGS
@@ -16,12 +16,14 @@ APP_VERSION=v2.0.10
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
 SEARCH_TAG=v2.0.4
-DATA_TAG=v2.0.4
+DATA_TAG=v3.0.0
 
-CKAN_TAG=2.6.2
-POSTGRES_TAG=9.3
+CKAN_TAG=2.9.1
+POSTGRES_TAG=13.1
 MONGO_TAG=3.4
-SOLR_TAG=5.3
+# SOLR_TAG=8.7.0
+SOLR_TAG=6.6.6
+REDIS_TAG=6.0.5
 
 ##
 # Repositories
@@ -53,6 +55,7 @@ SOLR_IMAGE_NAME=$ECOSIS_DOCKER_ORG/ecosis-solr
 
 MONGO_IMAGE_NAME=mongo
 POSTGRES_IMAGE_NAME=postgres
+REDIS_IMAGE_NAME=redis
 
 ALL_DOCKER_BUILD_IMAGES=( $SEARCH_IMAGE_NAME $CKAN_IMAGE_NAME \
  $DATA_IMAGE_NAME $SOLR_IMAGE_NAME )

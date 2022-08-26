@@ -1,24 +1,32 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
 ENV GIT_URL "git+https://github.com/ckan/ckan.git@ckan-$CKAN_VERSION#egg=ckan[requirements]"
 
+# you can select Internet Site and localhost for postfix/smtp server
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    python3-dev libpq-dev wget lsb-release \
+    python3-virtualenv python3-wheel \
+    python3-pip python3-venv git-core \
+    build-essential unzip zip awscli mongodb-clients \
+    --fix-missing
 
 # more help on this https://hub.docker.com/r/teraproc/postfix/~/dockerfile/
 # RUN echo "postfix postfix/main_mailer_type string Internet site" > /preseed.txt
 # RUN echo "postfix postfix/mailname string ecosis.org" >> /preseed.txt
 
 RUN export DEBIAN_FRONTEND=noninteractive
-# RUN debconf-set-selections /preseed.txt
+RUN debconf-set-selections /preseed.txt
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    python3-dev libpq-dev wget lsb-release \
-    python3-virtualenv python3-wheel \
-    python3-pip python3-venv git-core vim \
-    build-essential unzip zip awscli mongodb-clients \
-    --fix-missing
-# RUN rm /preseed.txt
+# Hack fix for postfix install
+# See: https://github.com/opf/openproject/pull/9878/commits/3503c06daf101327d15414b04040c7fdbc46ec50
+# RUN cp /etc/hostname /etc/x-hostname
+RUN echo ecosis.local > /etc/hostname
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y postfix
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install postfix
+RUN rm /preseed.txt
+# RUN mv /etc/x-hostname /etc/hostname
 
 # need the Postgresql 13 libraries
 RUN echo 1 && echo $(lsb_release -cs)
@@ -34,8 +42,7 @@ RUN apt-get update && apt-get install -y postgresql-client-13
 # RUN easy_install pip
 RUN pip3 install setuptools==44.1.0
 RUN pip3 install --upgrade pip
-RUN pip3 install --upgrade awscli
-RUN pip3 install debugpy gunicorn
+RUN pip3 install debugpy
 
 # create dir
 RUN mkdir -p /ckan
@@ -63,7 +70,6 @@ fi
 
 RUN ln -s /ckan/src/ckan/ckan/config/who.ini /etc/ckan/who.ini
 
-COPY ./wsgi.py /etc/ckan/wsgi.py
 COPY ./run.sh /etc/ckan/run.sh
 COPY ./init-pg.sh /etc/ckan/init-pg.sh
 COPY ./setup-ini.sh /etc/ckan/setup-ini.sh
@@ -77,6 +83,7 @@ COPY ./debug_server.py /etc/ckan/debug_server.py
 COPY ./debug.sh /etc/ckan/debug.sh
 
 # RUN apt-get clean
-ENV CKAN_INI=/etc/ckan/docker.ini
+
+EXPOSE 5000
 
 CMD bash -c '/etc/ckan/run.sh'

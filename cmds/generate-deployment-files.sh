@@ -37,8 +37,6 @@ ELASTIC_SEARCH_IMAGE_NAME_ESCAPED=$(echo $ELASTIC_SEARCH_IMAGE_NAME | sed 's/\//
 
 # generate local development dc file
 content=$(cat local-dev.yaml)
-VESSEL_TAG='local-dev'
-CLIENT_TAG='local-dev'
 for key in $(compgen -v); do
   if [[ $key == "COMP_WORDBREAKS" || $key == "content" ]]; then
     continue;
