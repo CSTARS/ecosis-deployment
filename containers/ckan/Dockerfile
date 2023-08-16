@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
@@ -12,11 +12,16 @@ ENV GIT_URL "git+https://github.com/ckan/ckan.git@ckan-$CKAN_VERSION#egg=ckan[re
 RUN export DEBIAN_FRONTEND=noninteractive
 # RUN debconf-set-selections /preseed.txt
 
+RUN apt-get update && apt install -y wget gpg
+RUN wget -nc https://www.mongodb.org/static/pgp/server-6.0.asc 
+RUN cat server-6.0.asc | gpg --dearmor | tee /etc/apt/keyrings/mongodb.gpg >/dev/null
+RUN sh -c 'echo "deb [ arch=amd64,arm64 signed-by=/etc/apt/keyrings/mongodb.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" >> /etc/apt/sources.list.d/mongo.list' 
+
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-dev libpq-dev wget lsb-release \
     python3-virtualenv python3-wheel \
     python3-pip python3-venv git-core vim \
-    build-essential unzip zip awscli mongodb-clients \
+    build-essential unzip zip awscli mongodb-org-shell \
     --fix-missing
 # RUN rm /preseed.txt
 
@@ -42,6 +47,8 @@ RUN mkdir -p /ckan
 
 RUN cd /ckan && \
     pip3 install --ignore-installed -e $GIT_URL
+
+RUN echo "$GIT_URL" > /ckan/.giturl
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8

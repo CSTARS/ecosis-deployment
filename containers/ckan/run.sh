@@ -25,4 +25,7 @@ cd $ROOT
 # paster serve /etc/ckan/docker.ini
 # ckan run --disable-reloader --host 0.0.0.0
 
-gunicorn -w 4 --threads 2 --bind 0.0.0.0:5000 wsgi:application
+# There is no config variable for this :(
+export WTF_CSRF_ENABLED=False
+
+gunicorn --preload -w 4 --threads 2 --bind 0.0.0.0:5000 wsgi:application
