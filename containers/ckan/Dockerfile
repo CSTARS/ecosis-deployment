@@ -21,7 +21,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-dev libpq-dev wget lsb-release \
     python3-virtualenv python3-wheel \
     python3-pip python3-venv git-core vim \
-    build-essential unzip zip awscli mongodb-org-shell \
+    build-essential unzip zip awscli mongodb-org-shell mongodb-org-tools \
     --fix-missing
 # RUN rm /preseed.txt
 

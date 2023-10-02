@@ -224,7 +224,7 @@ The backup cron `backup_cron.sh` will clean up the `/backups` dir, generate a ne
 
 To create a cron simple run `crontab -e` and add (runs once a day at 3am):
 ```
-0 3 * * * /usr/local/bin/docker compose -f /opt/ecosis-deployment-[dev|prod\/docker compose.yml exec -T ckan /etc/ckan/backup_cron.sh
+0 3 * * * /usr/bin/docker compose -f /opt/ecosis-deployment/docker-compose.yaml exec -T ckan /etc/ckan/backup_cron.sh
 ```
 
 ### Restore from backup
