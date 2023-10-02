@@ -5,8 +5,8 @@ After=network.target docker.service
 [Service]
 Type=simple
 WorkingDirectory=/opt/ecosis-deployment
-ExecStart=/usr/local/bin/docker-compose -f /opt/ecosis-deployment/docker-compose.yml up
-ExecStop=/usr/local/bin/docker-compose -f /opt/ecosis-deployment/docker-compose.yml down
+ExecStart=/usr/local/bin/docker compose -f /opt/ecosis-deployment/docker-compose.yml up
+ExecStop=/usr/local/bin/docker compose -f /opt/ecosis-deployment/docker-compose.yml down
 #Restart=always
 
 [Install]

@@ -12,11 +12,15 @@ APP_VERSION=v2.0.8
 # TAGS
 ##
 
+if [[ -z $BRANCH_NAME ]]; then
+  BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+fi
+
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-SEARCH_TAG=dev
-DATA_TAG=dev
+SEARCH_TAG=main
+DATA_TAG=ckan-2.10
 
 # CKAN_TAG=2.9.1
 CKAN_TAG=2.10.1
@@ -45,7 +49,7 @@ DATA_REPO_URL=$GITHUB_ORG_URL/$DATA_REPO_NAME
 ##
 
 # Docker Hub
-ECOSIS_DOCKER_ORG=ecosis
+ECOSIS_DOCKER_ORG=gcr.io/ecosis-prod
 DOCKER_CACHE_TAG="latest"
 
 # Docker Images

@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ##
-# Generate docker-compose deployment and local development files based on
+# Generate docker compose deployment and local development files based on
 # config.sh parameters
 ##
 

@@ -24,8 +24,8 @@ To run the the application, simply clone this repository at the tag/branch you w
  - `git clone https://github.com/cstars/ecosis-deployment`
  - `git checkout [APP_VERSION]`
  - Setup .env file [see below](#env-file)
- - Start docker-compose
-   `docker-compose up`
+ - Start docker compose
+   `docker compose up`
 
 # Development deployments
 
@@ -34,7 +34,7 @@ Development deployments, any non-master branch (production) deployment, have rel
   - When starting work on a new feature you can set `APP_VERSION` to either: the branch name or a version up tick with a suffix of `-dev`, `-rc1`, `-rc2`, etc.  ex: `APP_VERSION=v1.0.1-dev`.  You do not need to update this tag while you make updates and redeployments.  The `APP_VERSION` tag can stay fixed throughout the feature development process.
   - `*_TAG` variables can point at branches (instead of tags) in development branches (ONLY!).  This allows you to create builds of the latest code without having to create new 'versions' very time you want to test.
   - Branches `master`, `rc`, and `dev` will automatically build new images when this repository is pushed to GitHub.  However, in development you may wish to build without committing the repo.  For that case, simply run `./cmds/submit.sh` to start a new build.
-  - IMPORTANT.  When you are ready to commit changes, run `./cmds/generate-deployment-files.sh` to build a new docker-compose.yml file(s) and k8s files (TODO) of this deployment setup.  Then you can commit your changes.
+  - IMPORTANT.  When you are ready to commit changes, run `./cmds/generate-deployment-files.sh` to build a new docker compose.yml file(s) and k8s files (TODO) of this deployment setup.  Then you can commit your changes.
 
 
 # Production Deployments
@@ -45,7 +45,7 @@ Production deployments follow strict rules.  Please follow below.
     - `git checkout master`
     - `git merge rc`
   - Uptick `APP_VERSION` in `config.sh` to the new production version of the application.  There should be no suffix.
-  - Generate new docker-compose file
+  - Generate new docker compose file
     - `./cmds/generate-deployment-files.sh`
   - Commit and push changes to this repository.  Set the commit message as the version tag if you have nothing better to say
     - `git add --all`
@@ -76,7 +76,7 @@ To get started with local development, do the following:
   IMPORATANT: Make sure you checkout to the branches you wish to work on for each repository.
   - Setup the `./repositories` folder.  There is a helper script for this:
     - `./cmds/init-local-dev.sh`
-  - Create the docker-compose.yaml file:
+  - Create the docker compose.yaml file:
     - `./cmds/generate-deployment-files.sh`
     - Note: the local development folder (ecosis-local-dev) is ignored from git.  you can make changes at will, though these changes will be overwritten every time you run `generate-deployment-files.sh`.  To makes permanent changes you will need to update the `./templates/local-dev.yaml` file
   - create your .env file [see below](#env-file)
@@ -88,25 +88,25 @@ To get started with local development, do the following:
   - Build the `local-dev` tagged images:
     - `./cmds/build-local-dev.sh`
   - Start the local environment:
-    - `cd ecosis-local-dev; docker-compose up`
+    - `cd ecosis-local-dev; docker compose up`
 
 If this is the first time starting, you will need to initialize the postgresql database.  The `ecosis-data` container normally does this on start, however the `ecosis-data` container (CKAN) is not part of the local development cluster as CKAN should be run in your favorite IDE.
 
 To initialize the database:
-  - In a new terminal, run the init script, attaching to docker-compose cluster network.
+  - In a new terminal, run the init script, attaching to docker compose cluster network.
     - `docker run --rm -ti --env-file=.env --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev bash -c "/etc/ckan/setup-ini.sh; /etc/ckan/init-pg.sh"`
-    - If your docker-compose cluster has a different name, you can run `docker network ls` to list out network names to substitute. 
+    - If your docker compose cluster has a different name, you can run `docker network ls` to list out network names to substitute. 
 
 To Restore the database:
-  - In a new terminal, run the restore script in the same directory as the ecosis_backup.zip file, attaching to docker-compose cluster network.
+  - In a new terminal, run the restore script in the same directory as the ecosis_backup.zip file, attaching to docker compose cluster network.
     - `docker run --rm -ti -v $(pwd):/io --network=ecosis-local-dev_default ecosis/ecosis-data:local-dev /etc/ckan/restore_backup.sh`
-    - If your docker-compose cluster has a different name, you can run `docker network ls` to list out network names to substitute.
+    - If your docker compose cluster has a different name, you can run `docker network ls` to list out network names to substitute.
 
 ### Local development notes.
 
-   - Most containers have a commented out `command: bash -c "tail -f /dev/null"` in the `./ecosis-local-dev/docker-compose.yaml`.  You can uncomment this so the container starts without running the default process. Then you can bash onto container to for faster start/stop of server to see changes. ex:
+   - Most containers have a commented out `command: bash -c "tail -f /dev/null"` in the `./ecosis-local-dev/docker compose.yaml`.  You can uncomment this so the container starts without running the default process. Then you can bash onto container to for faster start/stop of server to see changes. ex:
      - uncomment `command: bash -c "tail -f /dev/null"` under the `search` service
-     - `docker-compose exec search bash`
+     - `docker compose exec search bash`
      - `node server.js` - starts the server
      - `ctrl+c` - stops the server
   - Code directories are mounted as volumes so changes to your host filesystem are reflected in container.  However, changes to application packages (ex: package.json) will require rebuild of images (`./cmds/build-local-dev.sh`)
@@ -128,7 +128,7 @@ Running CKAN in PyCharm.
     - Working directory: path/to/ecosis-local
 
 ## Local Development - Container Remote Debugging
-  - docker-compose exec ckan bash
+  - docker compose exec ckan bash
   - /etc/ckan/debug.sh
   - Connect to Python remote debugger on port `5678`
 
@@ -224,7 +224,7 @@ The backup cron `backup_cron.sh` will clean up the `/backups` dir, generate a ne
 
 To create a cron simple run `crontab -e` and add (runs once a day at 3am):
 ```
-0 3 * * * /usr/local/bin/docker-compose -f /opt/ecosis-deployment-[dev|prod\/docker-compose.yml exec -T ckan /etc/ckan/backup_cron.sh
+0 3 * * * /usr/local/bin/docker compose -f /opt/ecosis-deployment-[dev|prod\/docker compose.yml exec -T ckan /etc/ckan/backup_cron.sh
 ```
 
 ### Restore from backup
@@ -234,5 +234,5 @@ WARNING.  This will wipe your instance and replace with data from zip file.
 Copy backup from S3 bucket and place in ./io folder (The ./io folder is mounted into the CKAN container).  Rename to backup zipfile to `ecosis_backup.zip` removing the date from the filename.  Then from the root folder run:
 
 ```
-docker-compose exec ckan /etc/ckan/restore_backup.sh
+docker compose exec ckan /etc/ckan/restore_backup.sh
 ```

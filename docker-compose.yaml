@@ -9,7 +9,7 @@ services:
       - .env
 
   solr:
-    image: ecosis/ecosis-solr:6.6.6
+    image: gcr.io/ecosis-prod/ecosis-solr:6.6.6
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
 
@@ -24,7 +24,7 @@ services:
       - redis-data:/data
 
   search:
-    image: ecosis/ecosis-search:dev
+    image: gcr.io/ecosis-prod/ecosis-search:ckan-2.10
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
@@ -36,7 +36,7 @@ services:
       - "${SEARCH_HOST_PORT:-3000}:8000"
 
   ckan:
-    image: ecosis/ecosis-data:dev
+    image: gcr.io/ecosis-prod/ecosis-data:ckan-2.10
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
