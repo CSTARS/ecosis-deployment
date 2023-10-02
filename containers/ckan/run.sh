@@ -28,4 +28,6 @@ cd $ROOT
 # There is no config variable for this :(
 export WTF_CSRF_ENABLED=False
 
-gunicorn --preload -w 4 --threads 2 --bind 0.0.0.0:5000 wsgi:application
+# This is broken with postgres connection... need to figure out why
+# gunicorn --preload -w 4 --threads 2 --bind 0.0.0.0:5000 wsgi:application
+gunicorn --preload -w 1 --threads 1 --bind 0.0.0.0:5000 wsgi:application
