@@ -24,7 +24,7 @@ services:
       - redis-data:/data
 
   search:
-    image: gcr.io/ecosis-prod/ecosis-search:ckan-2.10
+    image: gcr.io/ecosis-prod/ecosis-search:main
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
