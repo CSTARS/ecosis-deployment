@@ -9,7 +9,7 @@ services:
       - .env
 
   solr:
-    image: gcr.io/ecosis-prod/ecosis-solr:6.6.6
+    image: ckan/ckan-solr:2.10
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
 

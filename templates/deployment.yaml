@@ -9,7 +9,7 @@ services:
       - .env
 
   solr:
-    image: {{SOLR_IMAGE_NAME}}:{{SOLR_TAG}}
+    image: {{SOLR_IMAGE_NAME}}:{{CKAN_SOLR_TAG}}
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
 

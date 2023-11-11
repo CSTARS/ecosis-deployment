@@ -11,7 +11,7 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
 
   solr:
-    image: {{SOLR_IMAGE_NAME}}:local-dev
+    image: {{SOLR_IMAGE_NAME}}:{{CKAN_SOLR_TAG}}
     volumes:
       - solr-data:/opt/solr/server/solr/ckan/data
     ports:
