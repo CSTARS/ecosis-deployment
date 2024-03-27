@@ -19,7 +19,8 @@ fi
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-SEARCH_TAG=main
+# SEARCH_TAG=main
+SEARCH_TAG=dev
 DATA_TAG=ckan-2.10
 
 # CKAN_TAG=2.9.1
