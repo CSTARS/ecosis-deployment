@@ -11,7 +11,7 @@ services:
   solr:
     image: ckan/ckan-solr:2.10
     volumes:
-      - solr-data:/opt/solr/server/solr/ckan/data
+      - solr-data:/var/solr
 
   mongo:
     image: mongo:3.4
@@ -42,6 +42,7 @@ services:
     volumes:
       - ckan-data:/var/lib/ckan
       - ckan-backup-data:/backup
+      - ckan-tmp:/tmp
       - ./io:/io
     env_file:
       - .env
@@ -58,4 +59,5 @@ volumes:
   mongo-data:
   redis-data:
   ckan-data:
+  ckan-tmp:
   ckan-backup-data:

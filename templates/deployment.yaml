@@ -42,6 +42,7 @@ services:
     volumes:
       - ckan-data:/var/lib/ckan
       - ckan-backup-data:/backup
+      - ckan-tmp:/tmp
       - ./io:/io
     env_file:
       - .env
@@ -58,4 +59,5 @@ volumes:
   mongo-data:
   redis-data:
   ckan-data:
+  ckan-tmp:
   ckan-backup-data:
