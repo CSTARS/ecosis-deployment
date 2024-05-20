@@ -53,6 +53,13 @@ services:
       - mongo
       - postgres
 
+  ckan-helper:
+    image: gcr.io/ecosis-prod/ecosis-ckan-helper:ckan-2.10
+    volumes:
+      - ckan-tmp:/tmp
+    env_file:
+      - .env
+
 volumes:
   pg-data:
   solr-data:

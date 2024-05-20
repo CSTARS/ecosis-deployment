@@ -53,6 +53,13 @@ services:
       - mongo
       - postgres
 
+  ckan-helper:
+    image: {{CKAN_HELPER_IMAGE_NAME}}:{{DATA_TAG}}
+    volumes:
+      - ckan-tmp:/tmp
+    env_file:
+      - .env
+
 volumes:
   pg-data:
   solr-data:

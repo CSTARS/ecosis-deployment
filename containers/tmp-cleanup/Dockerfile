@@ -4,7 +4,7 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y cron
 
 # Add your script file
-ADD script.sh /path/to/script.sh
+ADD ./tmp-cleanup.sh /tmp-cleanup.sh
 
 # Add your cron job file to the cron directory
 ADD cronjob /etc/cron.d/cronjob
