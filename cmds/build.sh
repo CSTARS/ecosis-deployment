@@ -39,10 +39,9 @@ docker build \
   ./containers/ckan
 
 # ckan tmp dir helper
-echo "building ckan $CKAN_HELPER_IMAGE_NAME:$CKAN_TAG"
+echo "building ckan $CKAN_HELPER_IMAGE_NAME:$DATA_TAG"
 docker build \
-  -t $CKAN_HELPER_IMAGE_NAME:$CKAN_TAG \
-  --build-arg CKAN_VERSION=${CKAN_TAG} \
+  -t $CKAN_HELPER_IMAGE_NAME:$DATA_TAG \
   --cache-from=$CKAN_HELPER_IMAGE_NAME:$DOCKER_CACHE_TAG \
   ./containers/tmp-cleanup
 
