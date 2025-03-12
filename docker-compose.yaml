@@ -25,6 +25,7 @@ services:
 
   search:
     image: gcr.io/ecosis-prod/ecosis-search:dev
+    restart: always
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod

@@ -50,7 +50,7 @@ DATA_REPO_URL=$GITHUB_ORG_URL/$DATA_REPO_NAME
 ##
 
 # Docker Hub
-ECOSIS_DOCKER_ORG=gcr.io/ecosis-prod
+ECOSIS_DOCKER_ORG=us-west1-docker.pkg.dev/ecosis-prod/pub
 DOCKER_CACHE_TAG="latest"
 
 # Docker Images
