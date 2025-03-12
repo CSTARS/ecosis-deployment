@@ -24,7 +24,7 @@ services:
       - redis-data:/data
 
   search:
-    image: gcr.io/ecosis-prod/ecosis-search:dev
+    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-search:dev
     restart: always
     environment:
       - MONGO_HOST=mongo
@@ -37,7 +37,7 @@ services:
       - "${SEARCH_HOST_PORT:-3000}:8000"
 
   ckan:
-    image: gcr.io/ecosis-prod/ecosis-data:ckan-2.10
+    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-data:ckan-2.10
     ports:
       - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
@@ -55,7 +55,7 @@ services:
       - postgres
 
   ckan-helper:
-    image: gcr.io/ecosis-prod/ecosis-ckan-helper:ckan-2.10
+    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-ckan-helper:ckan-2.10
     volumes:
       - ckan-tmp:/tmp
     env_file:
