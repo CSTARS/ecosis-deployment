@@ -25,7 +25,6 @@ services:
 
   search:
     image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-search:dev
-    restart: always
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
