@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
-ENV GIT_URL "git+https://github.com/ckan/ckan.git@ckan-$CKAN_VERSION#egg=ckan[requirements]"
+ENV GIT_URL "ckan[requirements] @ git+https://github.com/ckan/ckan.git@ckan-2.10.1"
 
 
 # more help on this https://hub.docker.com/r/teraproc/postfix/~/dockerfile/
@@ -47,7 +47,7 @@ RUN pip3 install debugpy gunicorn
 RUN mkdir -p /ckan
 
 RUN cd /ckan && \
-    pip3 install --ignore-installed -e $GIT_URL
+    pip3 install --ignore-installed -e "$GIT_URL"
 
 RUN echo "$GIT_URL" > /ckan/.giturl
 
