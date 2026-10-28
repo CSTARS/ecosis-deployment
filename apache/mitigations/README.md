@@ -32,21 +32,32 @@ them directly for immediate relief while the rest of this is deployed.
 
 ## 2. mod_evasive — per-IP, per-page throttling
 
-`evasive.conf` → `/etc/apache2/mods-available/evasive.conf`. Trips on rapid
-repeat hits to the *same* URI, which is exactly the pattern in the pasted logs
-(the same `/group/<uuid>` hit over and over, sub-second apart). Also caps
-total requests/sec per IP across the vhost. See the file for install/enable
-commands and tuning knobs.
+Trips on rapid repeat hits to the *same* URI, which is exactly the pattern in
+the pasted logs (the same `/group/<uuid>` hit over and over, sub-second
+apart). Also caps total requests/sec per IP across the vhost.
+
+```bash
+apt-get update && apt-get install -y libapache2-mod-evasive
+cp apache/mitigations/evasive.conf /etc/apache2/mods-available/evasive.conf
+mkdir -p /var/log/mod_evasive && chown www-data:www-data /var/log/mod_evasive
+a2enmod evasive
+apache2ctl configtest && systemctl restart apache2
+```
 
 ## 3. fail2ban — catches abuse mod_evasive's per-page logic can miss
-
-`fail2ban-filter.conf` → `/etc/fail2ban/filter.d/apache-reqlimit.conf`
-`fail2ban-jail.conf` → `/etc/fail2ban/jail.d/apache-reqlimit.conf`
 
 Bans an IP sustaining >300 req/min against either vhost, with an escalating
 ban time on repeat offenses. Complements mod_evasive, which only looks at one
 page/the whole site per second — this catches a client spreading load across
 many different pages to dodge the per-page limit.
+
+```bash
+apt-get update && apt-get install -y fail2ban
+cp apache/mitigations/fail2ban-filter.conf /etc/fail2ban/filter.d/apache-reqlimit.conf
+cp apache/mitigations/fail2ban-jail.conf /etc/fail2ban/jail.d/apache-reqlimit.conf
+systemctl restart fail2ban
+fail2ban-client status apache-reqlimit
+```
 
 ## 4. mod_reqtimeout — verify it's already on
 
