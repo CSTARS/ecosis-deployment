@@ -59,19 +59,74 @@ systemctl restart fail2ban
 fail2ban-client status apache-reqlimit
 ```
 
-## 4. mod_reqtimeout — verify it's already on
+**Troubleshooting:** if `systemctl restart fail2ban` fails with `Have not found any
+log file for sshd jail`, this host has no `/var/log/auth.log` (journald-only,
+no rsyslog) and fail2ban's stock `sshd` jail (enabled by default) crashes the
+whole service trying to find it — unrelated to the config above. Fix by
+pointing just that jail at journald:
+
+```bash
+cp apache/mitigations/fail2ban-sshd-backend-fix.conf /etc/fail2ban/jail.d/sshd-systemd-backend.conf
+systemctl restart fail2ban
+```
+
+## 4. Per-/24 subnet mitigation — for distributed scrapes
+
+If diagnosis (step 1) shows no single IP crossing mod_evasive/fail2ban's
+per-IP thresholds, but requests cluster heavily within the same `/24` (e.g.
+many different IPs under `223.109.252.0/24` each making a handful of
+requests — a scrape rotating through one ISP's address pool), per-IP tools
+have a low ceiling against it. Two options, pick one:
+
+**`subnet-hashlimit.sh` (recommended) — rate-limit per /24, don't block it outright.**
+Uses `iptables`'s `hashlimit` module to drop only the traffic *above* a rate
+from each source `/24`, so a few real users sharing that ISP's address block
+(CGNAT, mobile carrier, university NAT) aren't fully locked out — just capped
+alongside whatever's scraping from the same block. Runs in-kernel, before
+Apache ever sees the request.
+
+```bash
+chmod +x apache/mitigations/subnet-hashlimit.sh
+
+# 1. Monitor mode first — logs what WOULD be dropped, blocks nothing
+sudo ./apache/mitigations/subnet-hashlimit.sh monitor
+sudo journalctl -k -f | grep subnet-hashlimit
+
+# 2. Once the rate looks right (tune with SUBNET_HASHLIMIT_RATE /
+#    SUBNET_HASHLIMIT_BURST env vars and re-run if needed), enforce it:
+sudo ./apache/mitigations/subnet-hashlimit.sh enforce
+
+# rules don't survive reboot unless saved:
+apt-get install -y iptables-persistent && netfilter-persistent save
+```
+
+**`subnet-ratelimit.sh` (alternative) — hard-ban the whole /24 once it trips a threshold.**
+Use this instead of (not alongside) `subnet-hashlimit.sh` if you'd rather
+outright block an offending subnet than throttle it. Uses `ipset`'s
+`hash:net` type so bans auto-expire — run every minute via cron:
+
+```bash
+apt-get install -y ipset
+chmod +x apache/mitigations/subnet-ratelimit.sh
+cp apache/mitigations/subnet-ratelimit.sh /opt/ecosis-deployment/apache/mitigations/subnet-ratelimit.sh
+# crontab -e (as root):
+# * * * * * /opt/ecosis-deployment/apache/mitigations/subnet-ratelimit.sh
+```
+
+## 5. mod_reqtimeout — verify it's already on
 
 Debian's apache2 package enables `mod_reqtimeout` by default
 (`/etc/apache2/mods-enabled/reqtimeout.conf`) with sane anti-slowloris
 defaults. Just confirm it's active:
 
 ```bash
-apache2ctl -M | grep reqtimeout
+sudo apache2ctl -M | grep reqtimeout
 ```
 
-No new config needed unless that comes back empty.
+No new config needed unless that comes back empty (`sudo` is required since
+`apache2ctl` lives in `/usr/sbin`, which isn't always on a regular user's `$PATH`).
 
-## 5. Reverse caching (mod_cache) — deliberately NOT included here yet
+## 6. Reverse caching (mod_cache) — deliberately NOT included here yet
 
 Caching anonymous GETs to `/dataset`, `/group/*`, `/organization/*` would
 likely be the single biggest load-reduction, since repeat bot hits on the same
@@ -90,3 +145,8 @@ responses never cross).
 Each piece is independent and can be disabled on its own:
 - `a2dismod evasive && systemctl restart apache2`
 - `rm /etc/fail2ban/jail.d/apache-reqlimit.conf && systemctl restart fail2ban`
+- hashlimit: remove the two rules (`iptables -D INPUT ...` matching what
+  `subnet-hashlimit.sh enforce` added, or just reboot if rules weren't
+  persisted) — or re-run the script with `monitor` mode to swap `DROP` back to `LOG`.
+- subnet-ratelimit.sh: remove its cron entry and `ipset destroy bot-subnet-ban`
+  (after removing the iptables rule referencing it: `iptables -D INPUT -m set --match-set bot-subnet-ban src -j DROP`).
