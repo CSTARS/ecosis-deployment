@@ -73,6 +73,7 @@ RUN ln -s /ckan/src/ckan/ckan/config/who.ini /etc/ckan/who.ini
 
 COPY ./wsgi.py /etc/ckan/wsgi.py
 COPY ./run.sh /etc/ckan/run.sh
+COPY ./gunicorn.conf.py /etc/ckan/gunicorn.conf.py
 COPY ./init-pg.sh /etc/ckan/init-pg.sh
 COPY ./setup-ini.sh /etc/ckan/setup-ini.sh
 COPY ./setup-simple-ini.sh /etc/ckan/setup-simple-ini.sh
