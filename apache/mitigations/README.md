@@ -143,20 +143,23 @@ Caches anonymous GETs for 1 hour on two namespaces, likely the single biggest
 load-reduction here: repeat bot hits on the same page get served from
 Apache's disk cache instead of reaching the backend at all.
 
-- `cache-search.conf` → `ecosis.org`'s `/search/`
-- `cache-data.conf` → `data.ecosis.org`'s `/dataset/`, `/package/`,
-  `/organization/`, `/group/` — the exact paths the original bot logs that
-  started this whole effort were hammering
+- `cache-search.conf` → `ecosis.org`'s `/search/`, `/package/`, `/webassets/`,
+  `/base/`
+- `cache-data.conf` → `data.ecosis.org`'s `/dataset/`, `/organization/`,
+  `/group/`, `/webassets/`, `/base/` — `/organization/` and `/group/` are the
+  exact paths the original bot logs that started this whole effort were
+  hammering; `/webassets/` and `/base/` are static CSS/JS/image paths, safe
+  to cache regardless of how the dynamic-page rules shake out
 
 Both files apply the same base rules, but **not** via `<If>` around
 `CacheEnable`/`CacheDisable` — this Apache build refuses to start with either
 shape (`CacheEnable`/`CacheDisable cannot occur within <If> section`).
 Instead: a `RewriteCond [OR]` chain sets an env var (`CACHE_SKIP`) whenever
-the request fails *any* of the rules below, then `mod_headers` turns that
-into the `Cache-Control` header mod_cache itself obeys (`no-store` when
-skipped, `max-age=3600` otherwise) — no `<If>` needed anywhere. Adding a
-future rule is one more `RewriteCond ... [OR]` line in the relevant file.
-Current conditions (all must hold for a response to be cached):
+the request fails *any* of the rules below, then `mod_headers` injects
+`Cache-Control: no-store` when it's set, which mod_cache obeys — no `<If>`
+needed anywhere. Adding a future rule is one more `RewriteCond ... [OR]` line
+in the relevant file. Current conditions (all must hold for a response to be
+cached):
 
 - a CKAN session cookie is present (`ckan=...` — CKAN's
   `beaker.session.key`, see `containers/ckan/template.ini`) — i.e. logged-in/
@@ -167,6 +170,16 @@ Current conditions (all must hold for a response to be cached):
 - (CKAN only) the path is a write/management action — `/new`, `/edit`,
   `/delete`, `/member_new`, `/member_delete` — never cached even if somehow
   reached anonymously
+
+When none of the above apply, freshness comes from `CacheDefaultExpire`/
+`CacheMaxExpire` (both set to 3600), not an injected header — because CKAN
+(and apparently the search app too) sends `Cache-Control: private` on every
+response, confirmed by a live curl against `/dataset/<slug>` that came back
+`X-Cache: MISS` with `Cache-Control: private` from the backend alongside it.
+mod_cache is a *shared* cache and refuses to store anything marked `private`
+by default, regardless of any `max-age` also present — `CacheStorePrivate On`
+is the directive that overrides that refusal, so this is now set in both
+files.
 
 mod_cache also strips any `Set-Cookie` header from what it stores/serves,
 regardless of the rules above — defense-in-depth against the leak risk this
@@ -189,6 +202,9 @@ curl -sI https://ecosis.org/search/ | grep -i x-cache
 curl -sI -b "ckan=faketoken" https://ecosis.org/search/ | grep -i x-cache
 curl -sI "https://ecosis.org/search/?q=grass" | grep -i x-cache
 curl -sI "https://ecosis.org/search/user/profile" | grep -i x-cache
+curl -sI https://ecosis.org/package/<a-real-package-slug> | grep -i x-cache
+curl -sI https://ecosis.org/webassets/<a-real-asset-path> | grep -i x-cache
+curl -sI https://data.ecosis.org/webassets/<a-real-asset-path> | grep -i x-cache
 
 curl -sI https://data.ecosis.org/organization/<a-real-org-slug> | grep -i x-cache
 curl -sI https://data.ecosis.org/organization/<a-real-org-slug> | grep -i x-cache
