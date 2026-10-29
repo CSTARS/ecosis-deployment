@@ -74,6 +74,7 @@ services:
       - CCNQ_QUEUE_ENABLED=true
       - CCNQ_QUEUE_RULES_FILE=/opt/cork-cache-n-queue/rules/queue-data-rules.json
       - CCNQ_QUEUE_ALLOWLIST=127.0.0.1,::1,66.249.64.0/24,66.249.65.0/24,66.249.66.0/24,66.249.79.0/24
+      - CCNQ_CLIENT_IP_HEADER=X-Real-IP
       - CCNQ_PG_HOST=postgres
       - CCNQ_PG_USER=postgres
       - CCNQ_PG_PASSWORD=postgres
@@ -102,6 +103,7 @@ services:
       - CCNQ_QUEUE_ENABLED=true
       - CCNQ_QUEUE_RULES_FILE=/opt/cork-cache-n-queue/rules/queue-search-rules.json
       - CCNQ_QUEUE_ALLOWLIST=127.0.0.1,::1,66.249.64.0/24,66.249.65.0/24,66.249.66.0/24,66.249.79.0/24
+      - CCNQ_CLIENT_IP_HEADER=X-Real-IP
       - CCNQ_PG_HOST=postgres
       - CCNQ_PG_USER=postgres
       - CCNQ_PG_PASSWORD=postgres
