@@ -148,13 +148,14 @@ Apache's disk cache instead of reaching the backend at all.
   `/organization/`, `/group/` — the exact paths the original bot logs that
   started this whole effort were hammering
 
-Both files apply the same base rules. They're written as a single `<If>`
-wrapping `CacheEnable` with every rule ANDed together — **not** "enable
-broadly, then `CacheDisable` exceptions", because Apache refuses to start
-with that shape (`CacheDisable cannot occur within <If> section` —
-`CacheEnable` is allowed inside `<If>`, `CacheDisable` isn't). `cache-data.conf`
-applies the same condition to 4 path prefixes via a `mod_macro` template, so
-adding a future rule is one edit inside the macro, not one per prefix.
+Both files apply the same base rules, but **not** via `<If>` around
+`CacheEnable`/`CacheDisable` — this Apache build refuses to start with either
+shape (`CacheEnable`/`CacheDisable cannot occur within <If> section`).
+Instead: a `RewriteCond [OR]` chain sets an env var (`CACHE_SKIP`) whenever
+the request fails *any* of the rules below, then `mod_headers` turns that
+into the `Cache-Control` header mod_cache itself obeys (`no-store` when
+skipped, `max-age=3600` otherwise) — no `<If>` needed anywhere. Adding a
+future rule is one more `RewriteCond ... [OR]` line in the relevant file.
 Current conditions (all must hold for a response to be cached):
 
 - a CKAN session cookie is present (`ckan=...` — CKAN's
@@ -175,7 +176,7 @@ section used to be deferred over.
 mkdir -p /etc/apache2/mitigations
 cp apache/mitigations/cache-search.conf /etc/apache2/mitigations/cache-search.conf
 cp apache/mitigations/cache-data.conf /etc/apache2/mitigations/cache-data.conf
-a2enmod cache cache_disk macro
+a2enmod cache cache_disk headers
 apache2ctl configtest && systemctl reload apache2
 ```
 
@@ -219,5 +220,7 @@ mitigation you deployed. Individual pieces, if you only want one:
 - hashlimit: `sudo ./apache/mitigations/subnet-hashlimit.sh remove`
 - subnet-ratelimit: `sudo ./apache/mitigations/subnet-ratelimit.sh teardown`
   (removes the iptables rule, destroys the ipset, and removes its crontab entry)
-- cache: `rm /etc/apache2/mitigations/cache-*.conf && a2dismod cache_disk cache macro && systemctl reload apache2`
+- cache: `rm /etc/apache2/mitigations/cache-*.conf && a2dismod cache_disk cache && systemctl reload apache2`
+  (`headers`/`rewrite` are left enabled - too broadly useful to assume nothing
+  else on the host depends on them)
   (the `IncludeOptional` lines left in the vhosts are harmless with the files gone)
