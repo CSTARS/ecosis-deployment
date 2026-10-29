@@ -172,10 +172,10 @@ cached):
   reached anonymously
 
 When none of the above apply, freshness comes from `CacheDefaultExpire`/
-`CacheMaxExpire` (both set to 3600), not an injected header. Getting CKAN's
-pages to cache at all took two overrides, found by testing against a live
-`/dataset/<slug>` page and watching it stay `X-Cache: MISS` on repeat
-requests:
+`CacheMaxExpire` (both set to 3600), not an injected header. Getting this
+working against live CKAN traffic took three fixes, each found by testing
+against a real `/dataset/<slug>` page and watching `/var/log/apache2/error.log`
+and `curl`'s response headers:
 
 - CKAN sends `Cache-Control: private` on every response. mod_cache is a
   *shared* cache and refuses to store anything marked `private` by default,
@@ -185,13 +185,20 @@ requests:
   `Expires` header at all. mod_cache also refuses to store a response with no
   validator of some kind, by default — `CacheIgnoreNoLastMod On` overrides
   *that* refusal.
+- `CacheRoot` is set globally in Debian's
+  `/etc/apache2/mods-enabled/cache_disk.conf`, but a vhost-scoped `CacheEnable`
+  (ours, pulled in via `IncludeOptional` inside `<VirtualHost>`) does **not**
+  inherit it on this host — `error.log` showed `AH00703: Cannot cache files to
+  disk without a CacheRoot specified` on every request despite the global
+  config existing. Fixed by re-declaring `CacheRoot /var/cache/apache2/mod_cache_disk`
+  (same path) directly in both `cache-*.conf` files.
 
-Both are now set in both files. If caching still doesn't take (`X-Cache`
+All three are now set in both files. If caching still doesn't take (`X-Cache`
 stays `MISS` on a repeat request within the hour), check
-`/var/log/apache2/error.log` for `mod_cache`/`mod_cache_disk` warnings, and
-confirm with `curl -sI ... | grep -iE "cache-control|last-modified|etag|expires"`
-what the backend is actually sending — there may be a third header mod_cache
-is balking at that hasn't shown up in testing yet.
+`/var/log/apache2/error.log` for further `mod_cache`/`mod_cache_disk`
+warnings, and confirm with
+`curl -sI ... | grep -iE "cache-control|last-modified|etag|expires"` what the
+backend is actually sending.
 
 mod_cache also strips any `Set-Cookie` header from what it stores/serves,
 regardless of the rules above — defense-in-depth against the leak risk this
