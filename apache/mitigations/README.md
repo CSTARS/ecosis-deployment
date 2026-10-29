@@ -172,14 +172,26 @@ cached):
   reached anonymously
 
 When none of the above apply, freshness comes from `CacheDefaultExpire`/
-`CacheMaxExpire` (both set to 3600), not an injected header — because CKAN
-(and apparently the search app too) sends `Cache-Control: private` on every
-response, confirmed by a live curl against `/dataset/<slug>` that came back
-`X-Cache: MISS` with `Cache-Control: private` from the backend alongside it.
-mod_cache is a *shared* cache and refuses to store anything marked `private`
-by default, regardless of any `max-age` also present — `CacheStorePrivate On`
-is the directive that overrides that refusal, so this is now set in both
-files.
+`CacheMaxExpire` (both set to 3600), not an injected header. Getting CKAN's
+pages to cache at all took two overrides, found by testing against a live
+`/dataset/<slug>` page and watching it stay `X-Cache: MISS` on repeat
+requests:
+
+- CKAN sends `Cache-Control: private` on every response. mod_cache is a
+  *shared* cache and refuses to store anything marked `private` by default,
+  regardless of any `max-age` also present — `CacheStorePrivate On` overrides
+  that refusal.
+- CKAN's dynamically-rendered pages send no `Last-Modified`, `ETag`, or
+  `Expires` header at all. mod_cache also refuses to store a response with no
+  validator of some kind, by default — `CacheIgnoreNoLastMod On` overrides
+  *that* refusal.
+
+Both are now set in both files. If caching still doesn't take (`X-Cache`
+stays `MISS` on a repeat request within the hour), check
+`/var/log/apache2/error.log` for `mod_cache`/`mod_cache_disk` warnings, and
+confirm with `curl -sI ... | grep -iE "cache-control|last-modified|etag|expires"`
+what the backend is actually sending — there may be a third header mod_cache
+is balking at that hasn't shown up in testing yet.
 
 mod_cache also strips any `Set-Cookie` header from what it stores/serves,
 regardless of the rules above — defense-in-depth against the leak risk this
