@@ -32,13 +32,9 @@ services:
       - mongo
     env_file:
       - .env
-    ports:
-      - "${SEARCH_HOST_PORT:-3000}:8000"
 
   ckan:
     image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-data:ckan-2.10
-    ports:
-      - "${DATA_HOST_PORT:-3001}:5000"
     volumes:
       - ckan-data:/var/lib/ckan
       - ckan-backup-data:/backup
@@ -60,6 +56,61 @@ services:
     env_file:
       - .env
 
+  # cork-cache-n-queue in front of ckan - see cache-n-queue/README.md
+  ckan-cache:
+    image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/cork-cache-n-queue:0.0.1
+    ports:
+      - "${DATA_HOST_PORT:-3001}:3000"
+    environment:
+      - CCNQ_UPSTREAM_URL=http://ckan:5000
+      - CCNQ_CACHE_ENABLED=true
+      - CCNQ_CACHE_RULES_FILE=/opt/cork-cache-n-queue/rules/cache-data-rules.json
+      - CCNQ_CACHE_DIR=/data/cache
+      - CCNQ_CACHE_TTL_MS=3600000
+      - CCNQ_CACHE_RESPECT_CACHE_CONTROL=false
+      - CCNQ_CACHE_MAX_ITEM_SIZE_BYTES=5000000
+      - CCNQ_QUEUE_ENABLED=true
+      - CCNQ_QUEUE_RULES_FILE=/opt/cork-cache-n-queue/rules/queue-data-rules.json
+      - CCNQ_QUEUE_ALLOWLIST=127.0.0.1,::1,66.249.64.0/24,66.249.65.0/24,66.249.66.0/24,66.249.79.0/24
+      - CCNQ_PG_HOST=postgres
+      - CCNQ_PG_USER=postgres
+      - CCNQ_PG_PASSWORD=postgres
+      - CCNQ_PG_DATABASE=postgres
+      - CCNQ_PG_SCHEMA=ckan_cache_queue
+    volumes:
+      - ./cache-n-queue/rules:/opt/cork-cache-n-queue/rules:ro
+      - ckan-cache-data:/data/cache
+    depends_on:
+      - ckan
+      - postgres
+
+  # cork-cache-n-queue in front of search - see cache-n-queue/README.md
+  search-cache:
+    image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/cork-cache-n-queue:0.0.1
+    ports:
+      - "${SEARCH_HOST_PORT:-3000}:3000"
+    environment:
+      - CCNQ_UPSTREAM_URL=http://search:8000
+      - CCNQ_CACHE_ENABLED=true
+      - CCNQ_CACHE_RULES_FILE=/opt/cork-cache-n-queue/rules/cache-search-rules.json
+      - CCNQ_CACHE_DIR=/data/cache
+      - CCNQ_CACHE_TTL_MS=3600000
+      - CCNQ_CACHE_RESPECT_CACHE_CONTROL=false
+      - CCNQ_QUEUE_ENABLED=true
+      - CCNQ_QUEUE_RULES_FILE=/opt/cork-cache-n-queue/rules/queue-search-rules.json
+      - CCNQ_QUEUE_ALLOWLIST=127.0.0.1,::1,66.249.64.0/24,66.249.65.0/24,66.249.66.0/24,66.249.79.0/24
+      - CCNQ_PG_HOST=postgres
+      - CCNQ_PG_USER=postgres
+      - CCNQ_PG_PASSWORD=postgres
+      - CCNQ_PG_DATABASE=postgres
+      - CCNQ_PG_SCHEMA=search_cache_queue
+    volumes:
+      - ./cache-n-queue/rules:/opt/cork-cache-n-queue/rules:ro
+      - search-cache-data:/data/cache
+    depends_on:
+      - search
+      - postgres
+
 volumes:
   pg-data:
   solr-data:
@@ -68,3 +119,5 @@ volumes:
   ckan-data:
   ckan-tmp:
   ckan-backup-data:
+  ckan-cache-data:
+  search-cache-data:

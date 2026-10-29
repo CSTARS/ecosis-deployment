@@ -64,6 +64,11 @@ MONGO_IMAGE_NAME=mongo
 POSTGRES_IMAGE_NAME=postgres
 REDIS_IMAGE_NAME=redis
 
+# cache + queue proxy fronting ckan/search - external pre-built image, not
+# part of this repo's own build pipeline
+CACHE_QUEUE_IMAGE_NAME=us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/cork-cache-n-queue
+CACHE_QUEUE_TAG=0.0.1
+
 ALL_DOCKER_BUILD_IMAGES=( $SEARCH_IMAGE_NAME $CKAN_IMAGE_NAME \
  $DATA_IMAGE_NAME $CKAN_HELPER_IMAGE_NAME )
 

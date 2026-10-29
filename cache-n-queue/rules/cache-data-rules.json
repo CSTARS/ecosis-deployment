@@ -1,0 +1,23 @@
+[
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/dataset/" },
+    { "target": "cookie", "name": "ckan", "negate": true },
+    { "target": "query", "name": "q", "matchType": "regex", "value": ".*", "negate": true }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/organization/" },
+    { "target": "cookie", "name": "ckan", "negate": true },
+    { "target": "query", "name": "q", "matchType": "regex", "value": ".*", "negate": true }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/group/" },
+    { "target": "cookie", "name": "ckan", "negate": true },
+    { "target": "query", "name": "q", "matchType": "regex", "value": ".*", "negate": true }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/webassets/" }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/base/" }
+  ]
+]

@@ -1,0 +1,5 @@
+[
+  [{ "target": "path", "matchType": "startsWith", "value": "/dataset/" }],
+  [{ "target": "path", "matchType": "startsWith", "value": "/organization/" }],
+  [{ "target": "path", "matchType": "startsWith", "value": "/group/" }]
+]

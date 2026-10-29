@@ -137,7 +137,17 @@ sudo apache2ctl -M | grep reqtimeout
 No new config needed unless that comes back empty (`sudo` is required since
 `apache2ctl` lives in `/usr/sbin`, which isn't always on a regular user's `$PATH`).
 
-## 6. Reverse caching (mod_cache) — 1 hour, narrowly scoped
+## 6. Reverse caching (mod_cache) — 1 hour, narrowly scoped — SUPERSEDED
+
+**As of the `cork-cache-n-queue` integration, this Apache-level cache is
+disabled** (the `IncludeOptional` lines below are commented out in
+`../ecosis-data-le-ssl.conf` / `../ecosis-search-le-ssl.conf`). Caching now
+happens in the `ckan-cache`/`search-cache` containers in front of `ckan` and
+`search` — see `../../cache-n-queue/README.md` for the equivalent rules and
+why. This section, and the `cache-*.conf` files themselves, are kept only so
+the Apache-level cache can be restored quickly if the container-based one
+ever needs to be rolled back — uncomment the `IncludeOptional` lines and
+reload Apache.
 
 Caches anonymous GETs for 1 hour on two namespaces, likely the single biggest
 load-reduction here: repeat bot hits on the same page get served from

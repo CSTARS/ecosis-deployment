@@ -40,14 +40,11 @@ services:
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/client:/app/client
     depends_on:
       - mongo
-    ports:
-      - "${HOST_PORT:-8000}:8000"
     # command: bash -c "tail -f /dev/null"
 
   ckan:
     image: {{DATA_IMAGE_NAME}}:local-dev
     ports:
-      - "${DATA_HOST_PORT:-5000}:5000"
       - "5678:5678"
     volumes:
       - ckan-data:/var/lib/ckan
@@ -68,9 +65,78 @@ services:
   # Run ckan on your host using favorite python IDE
   # Mongo, Postgresql and Solr ports are exposed
 
+  # cork-cache-n-queue in front of search - see ../cache-n-queue/README.md
+  search-cache:
+    image: {{CACHE_QUEUE_IMAGE_NAME}}:{{CACHE_QUEUE_TAG}}
+    ports:
+      - "${HOST_PORT:-8000}:3000"
+    environment:
+      - CCNQ_UPSTREAM_URL=http://search:8000
+      - CCNQ_CACHE_ENABLED=true
+      - CCNQ_CACHE_RULES_FILE=/opt/cork-cache-n-queue/rules/cache-search-rules.json
+      - CCNQ_CACHE_DIR=/data/cache
+      - CCNQ_CACHE_TTL_MS=3600000
+      - CCNQ_CACHE_RESPECT_CACHE_CONTROL=false
+      - CCNQ_QUEUE_ENABLED=true
+      - CCNQ_QUEUE_RULES_FILE=/opt/cork-cache-n-queue/rules/queue-search-rules.json
+      - CCNQ_QUEUE_ALLOWLIST=127.0.0.1,::1,66.249.64.0/24,66.249.65.0/24,66.249.66.0/24,66.249.79.0/24
+      - CCNQ_PG_HOST=postgres
+      - CCNQ_PG_USER=postgres
+      - CCNQ_PG_PASSWORD=postgres
+      - CCNQ_PG_DATABASE=postgres
+      - CCNQ_PG_SCHEMA=search_cache_queue
+    volumes:
+      - ../cache-n-queue/rules:/opt/cork-cache-n-queue/rules:ro
+      - search-cache-data:/data/cache
+      # live-reflect local cork-cache-n-queue source edits - restart the
+      # container to pick them up (see ../../library/utils/cork-cache-n-queue)
+      - ../../../../library/utils/cork-cache-n-queue/src:/opt/cork-cache-n-queue/src
+      - ../../../../library/utils/cork-cache-n-queue/sql:/opt/cork-cache-n-queue/sql
+    depends_on:
+      - search
+      - postgres
+
+  # cork-cache-n-queue in front of ckan - see ../cache-n-queue/README.md
+  # CKAN normally runs on your host (IDE), not in the `ckan` container above,
+  # so this targets the host via host.docker.internal rather than `ckan:5000`
+  ckan-cache:
+    image: {{CACHE_QUEUE_IMAGE_NAME}}:{{CACHE_QUEUE_TAG}}
+    ports:
+      - "${DATA_HOST_PORT:-5000}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - CCNQ_UPSTREAM_URL=http://host.docker.internal:${DATA_HOST_PORT:-5000}
+      - CCNQ_CACHE_ENABLED=true
+      - CCNQ_CACHE_RULES_FILE=/opt/cork-cache-n-queue/rules/cache-data-rules.json
+      - CCNQ_CACHE_DIR=/data/cache
+      - CCNQ_CACHE_TTL_MS=3600000
+      - CCNQ_CACHE_RESPECT_CACHE_CONTROL=false
+      - CCNQ_CACHE_STRIP_SET_COOKIE=true
+      - CCNQ_CACHE_MAX_ITEM_SIZE_BYTES=5000000
+      - CCNQ_QUEUE_ENABLED=true
+      - CCNQ_QUEUE_RULES_FILE=/opt/cork-cache-n-queue/rules/queue-data-rules.json
+      - CCNQ_QUEUE_ALLOWLIST=127.0.0.1,::1,66.249.64.0/24,66.249.65.0/24,66.249.66.0/24,66.249.79.0/24
+      - CCNQ_PG_HOST=postgres
+      - CCNQ_PG_USER=postgres
+      - CCNQ_PG_PASSWORD=postgres
+      - CCNQ_PG_DATABASE=postgres
+      - CCNQ_PG_SCHEMA=ckan_cache_queue
+    volumes:
+      - ../cache-n-queue/rules:/opt/cork-cache-n-queue/rules:ro
+      - ckan-cache-data:/data/cache
+      # live-reflect local cork-cache-n-queue source edits - restart the
+      # container to pick them up (see ../../library/utils/cork-cache-n-queue)
+      - ../../../../library/utils/cork-cache-n-queue/src:/opt/cork-cache-n-queue/src
+      - ../../../../library/utils/cork-cache-n-queue/sql:/opt/cork-cache-n-queue/sql
+    depends_on:
+      - postgres
+
 volumes:
   pg-data:
   solr-data:
   mongo-data:
   redis-data:
   ckan-data:
+  ckan-cache-data:
+  search-cache-data:
