@@ -42,7 +42,7 @@ for f in cache-search.conf cache-data.conf; do
   fi
 done
 if [ "$removed_cache" = 1 ]; then
-  a2dismod cache_disk cache 2>/dev/null
+  a2dismod cache_disk cache macro 2>/dev/null
   systemctl reload apache2
   echo "removed (the IncludeOptional lines left in the vhosts are harmless with"
   echo " the target files gone)"

@@ -148,11 +148,14 @@ Apache's disk cache instead of reaching the backend at all.
   `/organization/`, `/group/` — the exact paths the original bot logs that
   started this whole effort were hammering
 
-Both files apply the same base rules, and both are written as "enable the
-namespace, then `CacheDisable` exceptions" so adding another rule later is
-just another `<If>`/`CacheDisable` block — no vhost edit needed, just a
-`systemctl reload apache2`. Current exceptions (never cached, regardless of
-namespace):
+Both files apply the same base rules. They're written as a single `<If>`
+wrapping `CacheEnable` with every rule ANDed together — **not** "enable
+broadly, then `CacheDisable` exceptions", because Apache refuses to start
+with that shape (`CacheDisable cannot occur within <If> section` —
+`CacheEnable` is allowed inside `<If>`, `CacheDisable` isn't). `cache-data.conf`
+applies the same condition to 4 path prefixes via a `mod_macro` template, so
+adding a future rule is one edit inside the macro, not one per prefix.
+Current conditions (all must hold for a response to be cached):
 
 - a CKAN session cookie is present (`ckan=...` — CKAN's
   `beaker.session.key`, see `containers/ckan/template.ini`) — i.e. logged-in/
@@ -172,7 +175,7 @@ section used to be deferred over.
 mkdir -p /etc/apache2/mitigations
 cp apache/mitigations/cache-search.conf /etc/apache2/mitigations/cache-search.conf
 cp apache/mitigations/cache-data.conf /etc/apache2/mitigations/cache-data.conf
-a2enmod cache cache_disk
+a2enmod cache cache_disk macro
 apache2ctl configtest && systemctl reload apache2
 ```
 
@@ -216,5 +219,5 @@ mitigation you deployed. Individual pieces, if you only want one:
 - hashlimit: `sudo ./apache/mitigations/subnet-hashlimit.sh remove`
 - subnet-ratelimit: `sudo ./apache/mitigations/subnet-ratelimit.sh teardown`
   (removes the iptables rule, destroys the ipset, and removes its crontab entry)
-- cache: `rm /etc/apache2/mitigations/cache-*.conf && a2dismod cache_disk cache && systemctl reload apache2`
+- cache: `rm /etc/apache2/mitigations/cache-*.conf && a2dismod cache_disk cache macro && systemctl reload apache2`
   (the `IncludeOptional` lines left in the vhosts are harmless with the files gone)
