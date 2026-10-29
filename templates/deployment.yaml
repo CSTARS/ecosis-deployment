@@ -25,6 +25,7 @@ services:
 
   search:
     image: {{SEARCH_IMAGE_NAME}}:{{SEARCH_TAG}}
+    restart: always
     environment:
       - MONGO_HOST=mongo
       - CLIENT_ENV=prod
