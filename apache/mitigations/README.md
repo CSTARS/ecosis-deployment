@@ -49,7 +49,10 @@ apache2ctl configtest && systemctl restart apache2
 Bans an IP sustaining >300 req/min against either vhost, with an escalating
 ban time on repeat offenses. Complements mod_evasive, which only looks at one
 page/the whole site per second — this catches a client spreading load across
-many different pages to dodge the per-page limit.
+many different pages to dodge the per-page limit. Static assets
+(`/webassets/*`, `.css`/`.js`/images/fonts) are excluded from the count, so a
+normal page load (easily 15+ asset requests alongside the actual page) doesn't
+inflate the numbers — only real route hits count toward the ban.
 
 ```bash
 apt-get update && apt-get install -y fail2ban
@@ -83,7 +86,12 @@ Uses `iptables`'s `hashlimit` module to drop only the traffic *above* a rate
 from each source `/24`, so a few real users sharing that ISP's address block
 (CGNAT, mobile carrier, university NAT) aren't fully locked out — just capped
 alongside whatever's scraping from the same block. Runs in-kernel, before
-Apache ever sees the request.
+Apache ever sees the request — which also means it **can't see the HTTP path**
+on HTTPS traffic (it's encrypted at that layer), so unlike fail2ban/
+subnet-ratelimit.sh below, it can't exclude static assets from the count. The
+default rate (120/min, burst 240 per `/24`) is set generously to account for
+that — a single frontpage load is ~18 requests, and several real visitors may
+share one `/24`. Always verify with `monitor` mode before `enforce`.
 
 ```bash
 chmod +x apache/mitigations/subnet-hashlimit.sh
@@ -102,8 +110,11 @@ apt-get install -y iptables-persistent && netfilter-persistent save
 
 **`subnet-ratelimit.sh` (alternative) — hard-ban the whole /24 once it trips a threshold.**
 Use this instead of (not alongside) `subnet-hashlimit.sh` if you'd rather
-outright block an offending subnet than throttle it. Uses `ipset`'s
-`hash:net` type so bans auto-expire — run every minute via cron:
+outright block an offending subnet than throttle it. Reads the access log
+(not raw packets), so unlike the hashlimit script above it *can* exclude
+static assets — the default threshold (60 dynamic-route requests/min per
+`/24`) reflects that narrower, cleaner count, not raw total requests. Uses
+`ipset`'s `hash:net` type so bans auto-expire — run every minute via cron:
 
 ```bash
 apt-get install -y ipset
@@ -126,27 +137,84 @@ sudo apache2ctl -M | grep reqtimeout
 No new config needed unless that comes back empty (`sudo` is required since
 `apache2ctl` lives in `/usr/sbin`, which isn't always on a regular user's `$PATH`).
 
-## 6. Reverse caching (mod_cache) — deliberately NOT included here yet
+## 6. Reverse caching (mod_cache) — 1 hour, narrowly scoped
 
-Caching anonymous GETs to `/dataset`, `/group/*`, `/organization/*` would
-likely be the single biggest load-reduction, since repeat bot hits on the same
-page would be served from Apache instead of reaching CKAN's single-worker
-gunicorn backend. It's left out of this first pass because a misconfigured
-reverse cache in front of an app with login sessions (CKAN sets an auth
-cookie) can leak a cached response from one user's request to another's if the
-cache doesn't strictly key/guard on the session cookie. Worth doing as a
-follow-up once mod_evasive + fail2ban are confirmed to be working, with
-careful testing (cache only responses from requests with no `Cookie` header,
-short TTL, verify via curl with/without a logged-in session cookie that
-responses never cross).
+Caches anonymous GETs for 1 hour on two namespaces, likely the single biggest
+load-reduction here: repeat bot hits on the same page get served from
+Apache's disk cache instead of reaching the backend at all.
 
-## Rollback
+- `cache-search.conf` → `ecosis.org`'s `/search/`
+- `cache-data.conf` → `data.ecosis.org`'s `/dataset/`, `/package/`,
+  `/organization/`, `/group/` — the exact paths the original bot logs that
+  started this whole effort were hammering
 
-Each piece is independent and can be disabled on its own:
-- `a2dismod evasive && systemctl restart apache2`
-- `rm /etc/fail2ban/jail.d/apache-reqlimit.conf && systemctl restart fail2ban`
-- hashlimit: remove the two rules (`iptables -D INPUT ...` matching what
-  `subnet-hashlimit.sh enforce` added, or just reboot if rules weren't
-  persisted) — or re-run the script with `monitor` mode to swap `DROP` back to `LOG`.
-- subnet-ratelimit.sh: remove its cron entry and `ipset destroy bot-subnet-ban`
-  (after removing the iptables rule referencing it: `iptables -D INPUT -m set --match-set bot-subnet-ban src -j DROP`).
+Both files apply the same base rules, and both are written as "enable the
+namespace, then `CacheDisable` exceptions" so adding another rule later is
+just another `<If>`/`CacheDisable` block — no vhost edit needed, just a
+`systemctl reload apache2`. Current exceptions (never cached, regardless of
+namespace):
+
+- a CKAN session cookie is present (`ckan=...` — CKAN's
+  `beaker.session.key`, see `containers/ckan/template.ini`) — i.e. logged-in/
+  personalized requests
+- the query string contains `q=` (an actual search query, not a static
+  listing page)
+- the path contains `/user/`
+- (CKAN only) the path is a write/management action — `/new`, `/edit`,
+  `/delete`, `/member_new`, `/member_delete` — never cached even if somehow
+  reached anonymously
+
+mod_cache also strips any `Set-Cookie` header from what it stores/serves,
+regardless of the rules above — defense-in-depth against the leak risk this
+section used to be deferred over.
+
+```bash
+mkdir -p /etc/apache2/mitigations
+cp apache/mitigations/cache-search.conf /etc/apache2/mitigations/cache-search.conf
+cp apache/mitigations/cache-data.conf /etc/apache2/mitigations/cache-data.conf
+a2enmod cache cache_disk
+apache2ctl configtest && systemctl reload apache2
+```
+
+**Verify** (repeat each GET — first should `MISS`, second within the hour
+should `HIT`; the cookie/query/user/action cases should never `HIT`):
+
+```bash
+curl -sI https://ecosis.org/search/ | grep -i x-cache
+curl -sI https://ecosis.org/search/ | grep -i x-cache
+curl -sI -b "ckan=faketoken" https://ecosis.org/search/ | grep -i x-cache
+curl -sI "https://ecosis.org/search/?q=grass" | grep -i x-cache
+curl -sI "https://ecosis.org/search/user/profile" | grep -i x-cache
+
+curl -sI https://data.ecosis.org/organization/<a-real-org-slug> | grep -i x-cache
+curl -sI https://data.ecosis.org/organization/<a-real-org-slug> | grep -i x-cache
+curl -sI https://data.ecosis.org/group/<a-real-group-slug> | grep -i x-cache
+curl -sI -b "ckan=faketoken" https://data.ecosis.org/organization/<a-real-org-slug> | grep -i x-cache
+curl -sI "https://data.ecosis.org/dataset/new" | grep -i x-cache
+
+ls -la /var/cache/apache2/mod_cache_disk/ 2>/dev/null | head
+```
+
+`CacheMaxFileSize 5000000` in `cache-data.conf` (~5MB) keeps large resource
+downloads under `/dataset/*/resource/*` from filling the disk cache with
+single files — raise or drop it if resource downloads should be cached too.
+
+## Uninstall / rollback
+
+Each piece can be removed independently, or all at once:
+
+```bash
+sudo ./apache/mitigations/uninstall.sh
+```
+
+This disables mod_evasive, removes the fail2ban jail/filter (leaving the
+unrelated sshd-backend fix in place), and tears down whichever subnet
+mitigation you deployed. Individual pieces, if you only want one:
+
+- mod_evasive: `a2dismod evasive && systemctl restart apache2`
+- fail2ban: `rm /etc/fail2ban/jail.d/apache-reqlimit.conf /etc/fail2ban/filter.d/apache-reqlimit.conf && systemctl restart fail2ban`
+- hashlimit: `sudo ./apache/mitigations/subnet-hashlimit.sh remove`
+- subnet-ratelimit: `sudo ./apache/mitigations/subnet-ratelimit.sh teardown`
+  (removes the iptables rule, destroys the ipset, and removes its crontab entry)
+- cache: `rm /etc/apache2/mitigations/cache-*.conf && a2dismod cache_disk cache && systemctl reload apache2`
+  (the `IncludeOptional` lines left in the vhosts are harmless with the files gone)

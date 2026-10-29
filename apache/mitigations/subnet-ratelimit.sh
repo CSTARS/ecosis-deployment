@@ -11,7 +11,10 @@ LOG=/var/log/apache2/access.log
 STATE_DIR=/var/lib/subnet-ratelimit
 OFFSET_FILE="$STATE_DIR/offset"
 SET_NAME=bot-subnet-ban
-THRESHOLD="${SUBNET_RATELIMIT_THRESHOLD:-150}"   # requests/min from one /24 before banning
+THRESHOLD="${SUBNET_RATELIMIT_THRESHOLD:-60}"    # dynamic-route requests/min from one
+                                                  # /24 before banning (static assets are
+                                                  # excluded below, so this isn't inflated
+                                                  # by a page's CSS/JS/image requests)
 BANTIME="${SUBNET_RATELIMIT_BANTIME:-3600}"      # seconds
 
 # Known-good ranges never counted toward a ban, regardless of volume.
@@ -19,6 +22,22 @@ BANTIME="${SUBNET_RATELIMIT_BANTIME:-3600}"      # seconds
 #   https://developers.google.com/static/search/apis/ipranges/googlebot.json
 #   https://www.bing.com/toolbox/bingbot.json
 WHITELIST_REGEX='^(66\.249\.|157\.55\.39\.|207\.46\.13\.)'
+
+if [ "${1:-}" = "teardown" ]; then
+  iptables -D INPUT -m set --match-set "$SET_NAME" src -j DROP 2>/dev/null \
+    && echo "Removed iptables rule referencing $SET_NAME." \
+    || echo "No matching iptables rule found (already removed?)."
+  ipset destroy "$SET_NAME" 2>/dev/null \
+    && echo "Destroyed ipset $SET_NAME." \
+    || echo "ipset $SET_NAME not found (already removed, or iptables rule above still referenced it)."
+  if crontab -l 2>/dev/null | grep -qF "subnet-ratelimit.sh"; then
+    crontab -l | grep -vF "subnet-ratelimit.sh" | crontab -
+    echo "Removed subnet-ratelimit.sh from root's crontab."
+  else
+    echo "No crontab entry found for subnet-ratelimit.sh."
+  fi
+  exit 0
+fi
 
 mkdir -p "$STATE_DIR"
 
@@ -31,14 +50,14 @@ LAST_OFFSET=$(cat "$OFFSET_FILE" 2>/dev/null || echo 0)
 [ "$LAST_OFFSET" -gt "$CUR_SIZE" ] && LAST_OFFSET=0   # log rotated/truncated since last run
 
 tail -c +"$((LAST_OFFSET + 1))" "$LOG" \
-  | awk '{print $1}' \
+  | awk '$7 !~ /^\/webassets\// && $7 !~ /\.(css|js|png|jpe?g|gif|svg|woff2?|ico|ttf|eot|map)(\?.*)?$/ {print $1}' \
   | grep -vE "$WHITELIST_REGEX" \
   | awk -F. '{print $1"."$2"."$3".0/24"}' \
   | sort | uniq -c | sort -rn \
   | awk -v th="$THRESHOLD" '$1 >= th {print $1, $2}' \
   | while read -r count net; do
       ipset add "$SET_NAME" "$net" timeout "$BANTIME" -exist
-      logger -t subnet-ratelimit "banned $net ($count req in last interval, threshold $THRESHOLD)"
+      logger -t subnet-ratelimit "banned $net ($count dynamic-route req in last interval, threshold $THRESHOLD)"
     done
 
 echo "$CUR_SIZE" > "$OFFSET_FILE"

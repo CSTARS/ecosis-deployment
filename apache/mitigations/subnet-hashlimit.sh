@@ -11,9 +11,16 @@
 # risking real traffic.
 set -euo pipefail
 
-RATE="${SUBNET_HASHLIMIT_RATE:-30/min}"   # sustained rate allowed per /24
-BURST="${SUBNET_HASHLIMIT_BURST:-60}"     # short burst allowance above that rate
-MODE="${1:-monitor}"                      # monitor | enforce
+RATE="${SUBNET_HASHLIMIT_RATE:-120/min}"  # sustained rate allowed per /24 - generous
+                                           # default: a single frontpage load is ~18
+                                           # requests (HTML + CSS/JS/images), and
+                                           # several real visitors may share one /24
+                                           # (CGNAT, university NAT) - iptables can't
+                                           # see HTTP paths on HTTPS traffic to be any
+                                           # more selective than raw request count.
+BURST="${SUBNET_HASHLIMIT_BURST:-240}"    # short burst allowance above that rate
+MODE="${1:-monitor}"                      # monitor | enforce | remove
+NAMES="subnet_http80_mon subnet_https443_mon subnet_http80 subnet_https443"
 
 add_rule() {
   local port="$1" name="$2" target="$3"
@@ -29,17 +36,36 @@ add_rule() {
     -j "$target" --log-prefix "subnet-hashlimit-$port: "
 }
 
-if [ "$MODE" = "monitor" ]; then
-  add_rule 80  subnet_http80_mon  LOG
-  add_rule 443 subnet_https443_mon LOG
-  echo "Monitor mode: watch 'journalctl -k -f | grep subnet-hashlimit' to see" \
-       "what would be dropped at rate=$RATE burst=$BURST. Nothing is blocked yet."
-elif [ "$MODE" = "enforce" ]; then
-  add_rule 80  subnet_http80  DROP
-  add_rule 443 subnet_https443 DROP
-  echo "Enforcing: traffic above $RATE per /24 (burst $BURST) on ports 80/443 is now dropped."
-  echo "Persist across reboot with: apt-get install -y iptables-persistent && netfilter-persistent save"
-else
-  echo "Usage: $0 [monitor|enforce]" >&2
-  exit 1
-fi
+remove_rules() {
+  local pattern removed=0 rule
+  pattern=$(echo "$NAMES" | tr ' ' '|')
+  while IFS= read -r rule; do
+    [ -z "$rule" ] && continue
+    eval "iptables -D ${rule#-A }"
+    removed=$((removed + 1))
+  done < <(iptables -S INPUT | grep -E -- "--hashlimit-name ($pattern)")
+  echo "Removed $removed subnet-hashlimit rule(s) (monitor and/or enforce)."
+}
+
+case "$MODE" in
+  monitor)
+    add_rule 80  subnet_http80_mon  LOG
+    add_rule 443 subnet_https443_mon LOG
+    echo "Monitor mode: watch 'journalctl -k -f | grep subnet-hashlimit' to see" \
+         "what would be dropped at rate=$RATE burst=$BURST. Nothing is blocked yet."
+    ;;
+  enforce)
+    add_rule 80  subnet_http80  DROP
+    add_rule 443 subnet_https443 DROP
+    echo "Enforcing: traffic above $RATE per /24 (burst $BURST) on ports 80/443 is now dropped."
+    echo "Persist across reboot with: apt-get install -y iptables-persistent && netfilter-persistent save"
+    ;;
+  remove)
+    remove_rules
+    echo "If rules were persisted via netfilter-persistent, re-save with: netfilter-persistent save"
+    ;;
+  *)
+    echo "Usage: $0 [monitor|enforce|remove]" >&2
+    exit 1
+    ;;
+esac
