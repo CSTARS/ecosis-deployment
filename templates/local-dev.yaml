@@ -103,11 +103,9 @@ services:
   ckan-cache:
     image: {{CACHE_QUEUE_IMAGE_NAME}}:{{CACHE_QUEUE_TAG}}
     ports:
-      - "${DATA_HOST_PORT:-5000}:3000"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "${DATA_HOST_PORT:-5001}:3000"
     environment:
-      - CCNQ_UPSTREAM_URL=http://host.docker.internal:${DATA_HOST_PORT:-5000}
+      - CCNQ_UPSTREAM_URL=http://ckan:5000
       - CCNQ_CACHE_ENABLED=true
       - CCNQ_CACHE_RULES_FILE=/opt/cork-cache-n-queue/rules/cache-data-rules.json
       - CCNQ_CACHE_DIR=/data/cache
