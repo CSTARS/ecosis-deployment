@@ -1,0 +1,14 @@
+[
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/package/" }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/assets/" }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/js/" }
+  ],
+  [
+    { "target": "path", "matchType": "startsWith", "value": "/loader/" }
+  ]
+]

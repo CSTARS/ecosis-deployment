@@ -12,17 +12,23 @@ APP_VERSION=v3.0.0
 # TAGS
 ##
 
+if [[ -z $BRANCH_NAME ]]; then
+  BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+fi
+
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-SEARCH_TAG=v2.0.4
-DATA_TAG=v3.0.0
+# SEARCH_TAG=main
+SEARCH_TAG=dev
+DATA_TAG=ckan-2.10
 
-CKAN_TAG=2.9.1
+# CKAN_TAG=2.9.1
+CKAN_TAG=2.10.1
 POSTGRES_TAG=13.1
 MONGO_TAG=3.4
 # SOLR_TAG=8.7.0
-SOLR_TAG=6.6.6
+CKAN_SOLR_TAG=2.10
 REDIS_TAG=6.0.5
 
 ##
@@ -44,21 +50,27 @@ DATA_REPO_URL=$GITHUB_ORG_URL/$DATA_REPO_NAME
 ##
 
 # Docker Hub
-ECOSIS_DOCKER_ORG=ecosis
+ECOSIS_DOCKER_ORG=us-west1-docker.pkg.dev/ecosis-prod/pub
 DOCKER_CACHE_TAG="latest"
 
 # Docker Images
 SEARCH_IMAGE_NAME=$ECOSIS_DOCKER_ORG/ecosis-search
 CKAN_IMAGE_NAME=$ECOSIS_DOCKER_ORG/ecosis-ckan
+CKAN_HELPER_IMAGE_NAME=$ECOSIS_DOCKER_ORG/ecosis-ckan-helper
 DATA_IMAGE_NAME=$ECOSIS_DOCKER_ORG/ecosis-data
-SOLR_IMAGE_NAME=$ECOSIS_DOCKER_ORG/ecosis-solr
+SOLR_IMAGE_NAME=ckan/ckan-solr
 
 MONGO_IMAGE_NAME=mongo
 POSTGRES_IMAGE_NAME=postgres
 REDIS_IMAGE_NAME=redis
 
+# cache + queue proxy fronting ckan/search - external pre-built image, not
+# part of this repo's own build pipeline
+CACHE_QUEUE_IMAGE_NAME=us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/cork-cache-n-queue
+CACHE_QUEUE_TAG=0.0.3
+
 ALL_DOCKER_BUILD_IMAGES=( $SEARCH_IMAGE_NAME $CKAN_IMAGE_NAME \
- $DATA_IMAGE_NAME $SOLR_IMAGE_NAME )
+ $DATA_IMAGE_NAME $CKAN_HELPER_IMAGE_NAME )
 
 
 # Git

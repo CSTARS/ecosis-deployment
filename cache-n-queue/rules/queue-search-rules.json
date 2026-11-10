@@ -1,0 +1,5 @@
+[
+  [{ "target": "path", "matchType": "startsWith", "value": "/search/" }],
+  [{ "target": "path", "matchType": "startsWith", "value": "/package/" }],
+  [{ "target": "path", "matchType": "startsWith", "value": "/api/" }]
+]

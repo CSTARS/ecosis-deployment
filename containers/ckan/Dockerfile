@@ -1,8 +1,8 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
-ENV GIT_URL "git+https://github.com/ckan/ckan.git@ckan-$CKAN_VERSION#egg=ckan[requirements]"
+ENV GIT_URL "ckan[requirements] @ git+https://github.com/ckan/ckan.git@ckan-2.10.1"
 
 
 # more help on this https://hub.docker.com/r/teraproc/postfix/~/dockerfile/
@@ -12,11 +12,16 @@ ENV GIT_URL "git+https://github.com/ckan/ckan.git@ckan-$CKAN_VERSION#egg=ckan[re
 RUN export DEBIAN_FRONTEND=noninteractive
 # RUN debconf-set-selections /preseed.txt
 
+RUN apt-get update && apt install -y wget gpg
+RUN wget -nc https://www.mongodb.org/static/pgp/server-6.0.asc 
+RUN cat server-6.0.asc | gpg --dearmor | tee /etc/apt/keyrings/mongodb.gpg >/dev/null
+RUN sh -c 'echo "deb [ arch=amd64,arm64 signed-by=/etc/apt/keyrings/mongodb.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" >> /etc/apt/sources.list.d/mongo.list' 
+
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-dev libpq-dev wget lsb-release \
     python3-virtualenv python3-wheel \
     python3-pip python3-venv git-core vim \
-    build-essential unzip zip awscli mongodb-clients \
+    build-essential unzip zip awscli mongodb-org-shell mongodb-org-tools \
     --fix-missing
 # RUN rm /preseed.txt
 
@@ -32,7 +37,8 @@ RUN apt-get update && apt-get install -y postgresql-client-13
 # RUN apt-get update && apt-get install -y mongodb-org-tools mongodb-org-shell
 
 # RUN easy_install pip
-RUN pip3 install setuptools==44.1.0
+# RUN pip3 install setuptools==44.1.0
+RUN pip3 install --upgrade setuptools pip wheel
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade awscli
 RUN pip3 install debugpy gunicorn
@@ -41,7 +47,9 @@ RUN pip3 install debugpy gunicorn
 RUN mkdir -p /ckan
 
 RUN cd /ckan && \
-    pip3 install --ignore-installed -e $GIT_URL
+    pip3 install --ignore-installed -e "$GIT_URL"
+
+RUN echo "$GIT_URL" > /ckan/.giturl
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
@@ -65,6 +73,7 @@ RUN ln -s /ckan/src/ckan/ckan/config/who.ini /etc/ckan/who.ini
 
 COPY ./wsgi.py /etc/ckan/wsgi.py
 COPY ./run.sh /etc/ckan/run.sh
+COPY ./gunicorn.conf.py /etc/ckan/gunicorn.conf.py
 COPY ./init-pg.sh /etc/ckan/init-pg.sh
 COPY ./setup-ini.sh /etc/ckan/setup-ini.sh
 COPY ./setup-simple-ini.sh /etc/ckan/setup-simple-ini.sh

@@ -6,7 +6,7 @@ set -e
 # if [ ! -f /etc/ckan/docker.ini ]; then
   CWD=$(pwd)
 
-  echo "Initializing ini file"
+  echo "Initializing ini file, this may take a moment"
   cp /etc/ckan/template.ini /etc/ckan/docker.ini
 
   # move to ckan root
@@ -56,6 +56,7 @@ set -e
   if [[ -z "$SMTP_TLS" ]] ; then SMTP_TLS=False; fi
 
   # apply runtime arguments
+  echo "applying ckan config..."
   ckan config-tool /etc/ckan/docker.ini "beaker.session.secret=$SESSION_SECRET" &>/dev/null
   ckan config-tool /etc/ckan/docker.ini "app_instance_uuid=$INSTANCE_UUID"
   ckan config-tool /etc/ckan/docker.ini "ckan.site_url=$SITE_URL"
@@ -64,11 +65,13 @@ set -e
   ckan config-tool /etc/ckan/docker.ini "api_token.jwt.encode.secret=string:$JWT_SECRET" &>/dev/null
   ckan config-tool /etc/ckan/docker.ini "api_token.jwt.decode.secret=string:$JWT_SECRET" &>/dev/null
 
+  echo "applying db config..."
   ckan config-tool /etc/ckan/docker.ini "ecosis.mongo.url=$MONGO_CONN_STR"
   ckan config-tool /etc/ckan/docker.ini "sqlalchemy.url=$PG_CONN_STR"
   ckan config-tool /etc/ckan/docker.ini "solr_url=$SOLR_URL"
   ckan config-tool /etc/ckan/docker.ini "ckan.redis.url=$REDIS_URL"
 
+  echo "applying ecosis config..."
   ckan config-tool /etc/ckan/docker.ini "ecosis.search_url=$SEARCH_URL"
   ckan config-tool /etc/ckan/docker.ini "ecosis.doi.url=$DOI_URL"
   ckan config-tool /etc/ckan/docker.ini "ecosis.doi.shoulder=$DOI_SHOULDER"
@@ -77,6 +80,7 @@ set -e
   ckan config-tool /etc/ckan/docker.ini "ecosis.remote_hosts=$REMOTE_HOSTS"
   ckan config-tool /etc/ckan/docker.ini "ecosis.jwt.secret=$JWT_SECRET" &>/dev/null
 
+  echo "applying smtp config..."
   ckan config-tool /etc/ckan/docker.ini "smtp.server=$SMTP_SERVER"
   ckan config-tool /etc/ckan/docker.ini "smtp.user=$SMTP_USERNAME"
   ckan config-tool /etc/ckan/docker.ini "smtp.password=$SMTP_PASSWORD" &>/dev/null
