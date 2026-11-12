@@ -37,7 +37,7 @@ services:
       - .env
 
   ckan:
-    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-data:ckan-2.10
+    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-data:main
     volumes:
       - ckan-data:/var/lib/ckan
       - ckan-backup-data:/backup
@@ -53,7 +53,7 @@ services:
       - postgres
 
   ckan-helper:
-    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-ckan-helper:ckan-2.10
+    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-ckan-helper:main
     volumes:
       - ckan-tmp:/tmp
     env_file:

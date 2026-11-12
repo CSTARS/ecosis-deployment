@@ -21,7 +21,7 @@ fi
 # Branches can be used for development deployments
 # SEARCH_TAG=main
 SEARCH_TAG=dev
-DATA_TAG=ckan-2.10
+DATA_TAG=main
 
 # CKAN_TAG=2.9.1
 CKAN_TAG=2.10.1
