@@ -62,6 +62,7 @@ services:
   # cork-cache-n-queue in front of ckan - see cache-n-queue/README.md
   ckan-cache:
     image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/cork-cache-n-queue:0.0.3
+    restart: always
     ports:
       - "${DATA_HOST_PORT:-3001}:3000"
     environment:
@@ -92,6 +93,7 @@ services:
   # cork-cache-n-queue in front of search - see cache-n-queue/README.md
   search-cache:
     image: us-west1-docker.pkg.dev/digital-ucdavis-edu/pub/cork-cache-n-queue:0.0.3
+    restart: always
     ports:
       - "${SEARCH_HOST_PORT:-3000}:3000"
     environment:
