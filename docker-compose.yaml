@@ -9,21 +9,41 @@ services:
       - .env
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   solr:
     image: ckan/ckan-solr:2.10
     volumes:
       - solr-data:/var/solr
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   mongo:
     image: mongo:3.4
     volumes:
       - mongo-data:/data/db
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   redis:
     image: redis:6.0.5
     volumes:
       - redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   search:
     image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-search:dev
@@ -35,6 +55,11 @@ services:
       - mongo
     env_file:
       - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   ckan:
     image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-data:main
@@ -51,6 +76,11 @@ services:
       - solr
       - mongo
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   ckan-helper:
     image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-ckan-helper:main
@@ -58,6 +88,11 @@ services:
       - ckan-tmp:/tmp
     env_file:
       - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   # cork-cache-n-queue in front of ckan - see cache-n-queue/README.md
   ckan-cache:
@@ -89,6 +124,11 @@ services:
     depends_on:
       - ckan
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   # cork-cache-n-queue in front of search - see cache-n-queue/README.md
   search-cache:
@@ -119,6 +159,11 @@ services:
     depends_on:
       - search
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
 volumes:
   pg-data:

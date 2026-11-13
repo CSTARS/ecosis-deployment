@@ -9,21 +9,41 @@ services:
       - .env
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   solr:
     image: {{SOLR_IMAGE_NAME}}:{{CKAN_SOLR_TAG}}
     volumes:
       - solr-data:/var/solr
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   mongo:
     image: {{MONGO_IMAGE_NAME}}:{{MONGO_TAG}}
     volumes:
       - mongo-data:/data/db
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   redis:
     image: {{REDIS_IMAGE_NAME}}:{{REDIS_TAG}}
     volumes:
       - redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   search:
     image: {{SEARCH_IMAGE_NAME}}:{{SEARCH_TAG}}
@@ -35,6 +55,11 @@ services:
       - mongo
     env_file:
       - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   ckan:
     image: {{DATA_IMAGE_NAME}}:{{DATA_TAG}}
@@ -51,6 +76,11 @@ services:
       - solr
       - mongo
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   ckan-helper:
     image: {{CKAN_HELPER_IMAGE_NAME}}:{{DATA_TAG}}
@@ -58,6 +88,11 @@ services:
       - ckan-tmp:/tmp
     env_file:
       - .env
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   # cork-cache-n-queue in front of ckan - see cache-n-queue/README.md
   ckan-cache:
@@ -89,6 +124,11 @@ services:
     depends_on:
       - ckan
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
   # cork-cache-n-queue in front of search - see cache-n-queue/README.md
   search-cache:
@@ -119,6 +159,11 @@ services:
     depends_on:
       - search
       - postgres
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "1"
 
 volumes:
   pg-data:
