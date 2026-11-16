@@ -144,6 +144,8 @@ SITE_ID=ecosis
 
 # CKAN beaker.session.secret parameter. required. should be long random string
 SESSION_SECRET=
+# redis url for CKAN beaker sessions. optional, defaults to redis://redis:6379/1
+# SESSION_REDIS_URL=
 # CKAN should be random uuid for app instance. required.
 INSTANCE_UUID=
 # EcoSIS JWT secret. required.  should be long random string

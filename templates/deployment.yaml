@@ -77,19 +77,7 @@ services:
       - solr
       - mongo
       - postgres
-    logging:
-      driver: json-file
-      options:
-        max-size: "100m"
-        max-file: "1"
-
-  ckan-helper:
-    image: {{CKAN_HELPER_IMAGE_NAME}}:{{DATA_TAG}}
-    restart: always
-    volumes:
-      - ckan-tmp:/tmp
-    env_file:
-      - .env
+      - redis
     logging:
       driver: json-file
       options:

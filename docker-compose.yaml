@@ -77,19 +77,7 @@ services:
       - solr
       - mongo
       - postgres
-    logging:
-      driver: json-file
-      options:
-        max-size: "100m"
-        max-file: "1"
-
-  ckan-helper:
-    image: us-west1-docker.pkg.dev/ecosis-prod/pub/ecosis-ckan-helper:main
-    restart: always
-    volumes:
-      - ckan-tmp:/tmp
-    env_file:
-      - .env
+      - redis
     logging:
       driver: json-file
       options:

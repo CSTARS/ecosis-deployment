@@ -38,13 +38,6 @@ docker build \
   --cache-from=$CKAN_IMAGE_NAME:$DOCKER_CACHE_TAG \
   ./containers/ckan
 
-# ckan tmp dir helper
-echo "building ckan $CKAN_HELPER_IMAGE_NAME:$DATA_TAG"
-docker build \
-  -t $CKAN_HELPER_IMAGE_NAME:$DATA_TAG \
-  --cache-from=$CKAN_HELPER_IMAGE_NAME:$DOCKER_CACHE_TAG \
-  ./containers/tmp-cleanup
-
 # ecosis data
 echo "building ecosis data $DATA_IMAGE_NAME:$DATA_TAG"
 docker build \
