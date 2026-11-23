@@ -172,7 +172,7 @@ in the relevant file. Current conditions (all must hold for a response to be
 cached):
 
 - a CKAN session cookie is present (`ckan=...` — CKAN's
-  `beaker.session.key`, see `containers/ckan/template.ini`) — i.e. logged-in/
+  `SESSION_COOKIE_NAME`, see `containers/ckan/template.ini`) — i.e. logged-in/
   personalized requests
 - the query string contains `q=` (an actual search query, not a static
   listing page)

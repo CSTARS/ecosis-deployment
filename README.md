@@ -41,6 +41,9 @@ Development deployments, any non-master branch (production) deployment, have rel
 
 Production deployments follow strict rules.  Please follow below.
 
+> Upgrading an existing install from CKAN 2.10 to 2.12 needs extra one-time
+> steps (DB migration, Solr reset, reindex): see [upgrade-ckan-2.12.md](./upgrade-ckan-2.12.md).
+
   - merge the `rc` branch into `master`
     - `git checkout master`
     - `git merge rc`
@@ -142,10 +145,9 @@ Here are the .env file parameters.
 # CKAN ckan.site_id parameter. required.
 SITE_ID=ecosis
 
-# CKAN beaker.session.secret parameter. required. should be long random string
+# CKAN SECRET_KEY parameter (signs session cookies; CSRF falls back to it).
+# required. should be long random string
 SESSION_SECRET=
-# redis url for CKAN beaker sessions. optional, defaults to redis://redis:6379/1
-# SESSION_REDIS_URL=
 # CKAN should be random uuid for app instance. required.
 INSTANCE_UUID=
 # EcoSIS JWT secret. required.  should be long random string

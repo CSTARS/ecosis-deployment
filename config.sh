@@ -6,7 +6,7 @@
 
 # Main version number we are tagging the app with. Always update
 # this when you cut a new version of the app!
-APP_VERSION=v3.0.0
+APP_VERSION=v3.1.0
 
 ##
 # TAGS
@@ -20,15 +20,14 @@ fi
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
 # SEARCH_TAG=main
-SEARCH_TAG=dev
-DATA_TAG=main
+SEARCH_TAG=v2.1.0
+DATA_TAG=v3.1.0
 
-# CKAN_TAG=2.9.1
-CKAN_TAG=2.10.1
+CKAN_TAG=2.12.1
 POSTGRES_TAG=13.1
 MONGO_TAG=3.4
 # SOLR_TAG=8.7.0
-CKAN_SOLR_TAG=2.10
+CKAN_SOLR_TAG=2.12-solr9
 REDIS_TAG=6.0.5
 
 ##

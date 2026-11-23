@@ -22,3 +22,8 @@ cd ./repositories
 for repo in "${ALL_GIT_REPOSITORIES[@]}"; do
   ln -s ../../$repo .
 done
+
+# CKAN source, mounted over /ckan/src/ckan by the local-dev compose file.
+# It must exist and match the CKAN version installed in the image (CKAN_TAG),
+# otherwise the `ckan` command in the container cannot import ckan.
+git clone --depth 1 --branch ckan-$CKAN_TAG https://github.com/ckan/ckan.git ckan
