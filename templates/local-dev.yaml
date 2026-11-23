@@ -33,10 +33,16 @@ services:
     image: {{SEARCH_IMAGE_NAME}}:local-dev
     environment:
       - MONGO_HOST=mongo
+      # CKAN links shown in the browser go to the local ckan-cache port;
+      # the search server's own CKAN API calls go straight to the ckan
+      # container (without these it falls back to production data.ecosis.org)
+      - CKAN_SERVER_URL=http://localhost:${DATA_HOST_PORT:-5001}
+      - CKAN_INTERNAL_URL=http://ckan:5000
     volumes:
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/index.js:/app/index.js
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/lib:/app/lib
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/controllers:/app/controllers
+      - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/models:/app/models
       - ../{{REPOSITORY_DIR}}/{{SEARCH_REPO_NAME}}/client:/app/client
     depends_on:
       - mongo
@@ -91,8 +97,8 @@ services:
       - search-cache-data:/data/cache
       # live-reflect local cork-cache-n-queue source edits - restart the
       # container to pick them up (see ../../library/utils/cork-cache-n-queue)
-      - ../../../../library/utils/cork-cache-n-queue/src:/opt/cork-cache-n-queue/src
-      - ../../../../library/utils/cork-cache-n-queue/sql:/opt/cork-cache-n-queue/sql
+      # - ../../../../library/utils/cork-cache-n-queue/src:/opt/cork-cache-n-queue/src
+      # - ../../../../library/utils/cork-cache-n-queue/sql:/opt/cork-cache-n-queue/sql
     depends_on:
       - search
       - postgres
@@ -127,8 +133,8 @@ services:
       - ckan-cache-data:/data/cache
       # live-reflect local cork-cache-n-queue source edits - restart the
       # container to pick them up (see ../../library/utils/cork-cache-n-queue)
-      - ../../../../library/utils/cork-cache-n-queue/src:/opt/cork-cache-n-queue/src
-      - ../../../../library/utils/cork-cache-n-queue/sql:/opt/cork-cache-n-queue/sql
+      # - ../../../../library/utils/cork-cache-n-queue/src:/opt/cork-cache-n-queue/src
+      # - ../../../../library/utils/cork-cache-n-queue/sql:/opt/cork-cache-n-queue/sql
     depends_on:
       - postgres
 

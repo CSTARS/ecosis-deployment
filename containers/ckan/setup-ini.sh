@@ -32,9 +32,6 @@ set -e
   if [[ -z "$REDIS_URL" ]] ; then 
     REDIS_URL="redis://redis:6379/0";
   fi
-  if [[ -z "$SESSION_REDIS_URL" ]] ; then 
-    SESSION_REDIS_URL="redis://redis:6379/1";
-  fi
   if [[ -z "$SITE_URL" ]] ; then 
     echo "SITE_URL not set";
     exit -1;
@@ -60,7 +57,7 @@ set -e
 
   # apply runtime arguments
   echo "applying ckan config..."
-  ckan config-tool /etc/ckan/docker.ini "beaker.session.secret=$SESSION_SECRET" &>/dev/null
+  ckan config-tool /etc/ckan/docker.ini "SECRET_KEY=$SESSION_SECRET" &>/dev/null
   ckan config-tool /etc/ckan/docker.ini "app_instance_uuid=$INSTANCE_UUID"
   ckan config-tool /etc/ckan/docker.ini "ckan.site_url=$SITE_URL"
   ckan config-tool /etc/ckan/docker.ini "ckan.site_id=$SITE_ID"
@@ -73,7 +70,6 @@ set -e
   ckan config-tool /etc/ckan/docker.ini "sqlalchemy.url=$PG_CONN_STR"
   ckan config-tool /etc/ckan/docker.ini "solr_url=$SOLR_URL"
   ckan config-tool /etc/ckan/docker.ini "ckan.redis.url=$REDIS_URL"
-  ckan config-tool /etc/ckan/docker.ini "beaker.session.url=$SESSION_REDIS_URL"
 
   echo "applying ecosis config..."
   ckan config-tool /etc/ckan/docker.ini "ecosis.search_url=$SEARCH_URL"

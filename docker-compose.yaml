@@ -16,7 +16,7 @@ services:
         max-file: "1"
 
   solr:
-    image: ckan/ckan-solr:2.10
+    image: ckan/ckan-solr:2.12-solr9
     volumes:
       - solr-data:/var/solr
     logging:

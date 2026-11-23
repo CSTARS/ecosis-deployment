@@ -18,6 +18,10 @@ cd $ROOT
 ./setup-ini.sh
 ./init-pg.sh
 
+# apply any pending core + plugin database migrations (idempotent). Required
+# after CKAN upgrades (eg 2.10 -> 2.12)
+ckan -c /etc/ckan/docker.ini db upgrade
+
 #paster --plugin=ckan search-index rebuild --config=/etc/ckan/docker.ini
 #paster db upgrade --config=/etc/ckan/docker.ini
 

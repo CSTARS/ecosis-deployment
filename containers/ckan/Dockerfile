@@ -2,7 +2,8 @@ FROM ubuntu:22.04
 
 ARG CKAN_VERSION
 ENV CKAN_VERSION ${CKAN_VERSION}
-ENV GIT_URL "ckan[requirements] @ git+https://github.com/ckan/ckan.git@ckan-2.10.1"
+# set from config.sh CKAN_TAG via cmds/build.sh
+ENV GIT_URL "ckan[requirements] @ git+https://github.com/ckan/ckan.git@ckan-${CKAN_VERSION}"
 
 
 # more help on this https://hub.docker.com/r/teraproc/postfix/~/dockerfile/
@@ -22,6 +23,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3-virtualenv python3-wheel \
     python3-pip python3-venv git-core vim \
     build-essential unzip zip awscli mongodb-org-shell mongodb-org-tools \
+    libmagic1 \
     --fix-missing
 # RUN rm /preseed.txt
 
@@ -64,12 +66,6 @@ ENV LANG C.UTF-8
 
 RUN mkdir /etc/ckan
 RUN ckan generate config /etc/ckan/default.ini
-
-RUN if [ -f /etc/ckan/who.ini ]; then \
-    rm /etc/ckan/who.ini; \
-fi
-
-RUN ln -s /ckan/src/ckan/ckan/config/who.ini /etc/ckan/who.ini
 
 COPY ./wsgi.py /etc/ckan/wsgi.py
 COPY ./run.sh /etc/ckan/run.sh
